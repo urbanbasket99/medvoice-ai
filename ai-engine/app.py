@@ -1,9 +1,21 @@
 from fastapi import FastAPI, UploadFile, File
 from faster_whisper import WhisperModel
+from fastapi.middleware.cors import CORSMiddleware
+from medical_formatter import format_medical_notes
 import shutil
 import os
 
 app = FastAPI(title="MedVoice AI")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 print("Loading Whisper Model...")
 
@@ -46,7 +58,10 @@ async def transcribe(audio: UploadFile = File(...)):
     for segment in segments:
         transcript += segment.text + " "
 
+    formatted = format_medical_notes(transcript)
+
     return {
         "language": info.language,
-        "transcript": transcript.strip()
+        "transcript": transcript.strip(),
+        "medicalNotes": formatted
     }
