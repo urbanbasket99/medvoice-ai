@@ -4,9 +4,11 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import TrendingFlatRoundedIcon from "@mui/icons-material/TrendingFlatRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import LocalHospitalRoundedIcon from "@mui/icons-material/LocalHospitalRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import GraphicEqRoundedIcon from "@mui/icons-material/GraphicEqRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
+import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 
 import type { KpiIconKey, KpiMetric, TrendDirection } from "../types/dashboard.types";
 
@@ -16,7 +18,9 @@ export interface KpiCardProps {
 
 const ICONS: Record<KpiIconKey, ReactElement> = {
   patients: <GroupsRoundedIcon fontSize="small" />,
+  doctors: <LocalHospitalRoundedIcon fontSize="small" />,
   appointments: <EventAvailableRoundedIcon fontSize="small" />,
+  consultations: <MedicalServicesRoundedIcon fontSize="small" />,
   transcriptions: <GraphicEqRoundedIcon fontSize="small" />,
   pendingReviews: <FactCheckRoundedIcon fontSize="small" />,
 };

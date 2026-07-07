@@ -1,0 +1,1 @@
+export { useLabOrderSearch } from "./useLabOrders";

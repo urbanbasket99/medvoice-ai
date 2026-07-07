@@ -51,6 +51,22 @@ class Settings(BaseSettings):
     # Password hashing
     bcrypt_rounds: int = 12
 
+    # Voice recordings
+    voice_recordings_dir: str = "storage/voice_recordings"
+    max_voice_recording_size_mb: int = 100
+
+    # Transcription audio uploads
+    transcription_audio_dir: str = "storage/transcription_audio"
+    max_transcription_upload_mb: int = 100
+
+    # AI Engine
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    whisper_model: str = "whisper-1"
+    temperature: float = 0.7
+    max_tokens: int = 2048
+    ai_settings_path: str = "storage/ai_settings.json"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

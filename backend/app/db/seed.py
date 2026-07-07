@@ -97,6 +97,58 @@ PERMISSION_CATALOG: list[tuple[str, str]] = [
     ("patients:create", "Register new patients"),
     ("patients:update", "Update patient records"),
     ("patients:delete", "Deactivate (soft-delete) patient records"),
+    # Doctors bounded context (see app/modules/doctors).
+    ("doctors:read", "View doctor records"),
+    ("doctors:create", "Register new doctors"),
+    ("doctors:update", "Update doctor records"),
+    ("doctors:delete", "Deactivate (soft-delete) doctor records"),
+    # Appointments bounded context (see app/modules/appointments).
+    ("appointments:read", "View appointment records"),
+    ("appointments:create", "Schedule new appointments"),
+    ("appointments:update", "Update appointment records"),
+    ("appointments:delete", "Cancel (soft-delete) appointment records"),
+    ("consultations:read", "View consultation records"),
+    ("consultations:create", "Start new consultations"),
+    ("consultations:update", "Update consultation records"),
+    ("consultations:delete", "Cancel (soft-delete) consultation records"),
+    # Voice recording bounded context (see app/modules/voice).
+    ("voice:record", "Start, stop, and upload consultation voice recordings"),
+    ("voice:read", "View and playback consultation voice recordings"),
+    ("voice:delete", "Delete consultation voice recordings"),
+    # AI Engine bounded context (see app/modules/ai).
+    ("ai:read", "View AI provider catalog, models, health, and settings"),
+    ("ai:update", "Update AI runtime settings"),
+    ("ai:test", "Run AI connectivity and completion tests"),
+    # Speech-to-text bounded context (see app/modules/transcriptions).
+    ("transcriptions:read", "View consultation transcripts"),
+    ("transcriptions:create", "Upload audio and start transcription jobs"),
+    ("transcriptions:update", "Edit and save consultation transcripts"),
+    ("transcriptions:delete", "Delete consultation transcripts"),
+    # Prescriptions bounded context (see app/modules/prescriptions).
+    ("prescriptions:read", "View prescriptions and medicine catalog"),
+    ("prescriptions:create", "Create new prescriptions"),
+    ("prescriptions:update", "Update prescription records"),
+    ("prescriptions:delete", "Deactivate (soft-delete) prescription records"),
+    # Laboratory bounded context (see app/modules/laboratory).
+    ("laboratory:read", "View lab orders and test catalog"),
+    ("laboratory:create", "Create new lab orders"),
+    ("laboratory:update", "Update lab orders and status"),
+    ("laboratory:delete", "Deactivate (soft-delete) lab orders"),
+    # Radiology bounded context (see app/modules/radiology).
+    ("radiology:read", "View radiology orders and test catalog"),
+    ("radiology:create", "Create new radiology orders"),
+    ("radiology:update", "Update radiology orders and status"),
+    ("radiology:delete", "Deactivate (soft-delete) radiology orders"),
+    # Pharmacy bounded context (see app/modules/pharmacy).
+    ("pharmacy:read", "View pharmacy medicines, stock, dispenses, and suppliers"),
+    ("pharmacy:create", "Create pharmacy medicines, batches, and dispense records"),
+    ("pharmacy:update", "Update pharmacy medicines, batches, stock, and dispenses"),
+    ("pharmacy:delete", "Deactivate (soft-delete) pharmacy medicines and dispenses"),
+    # Billing bounded context (see app/modules/billing).
+    ("billing:read", "View invoices, payments, and billing reports"),
+    ("billing:create", "Create invoices and record payments"),
+    ("billing:update", "Update invoice records"),
+    ("billing:delete", "Cancel (soft-delete) invoices"),
 ]
 
 DEFAULT_ADMIN_EMAIL = "admin@medvoice.com"

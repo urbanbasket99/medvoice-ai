@@ -14,7 +14,7 @@ export interface KpiTrend {
   comparisonLabel: string;
 }
 
-export type KpiIconKey = "patients" | "appointments" | "transcriptions" | "pendingReviews";
+export type KpiIconKey = "patients" | "doctors" | "appointments" | "consultations" | "transcriptions" | "pendingReviews";
 
 export interface KpiMetric {
   id: string;
