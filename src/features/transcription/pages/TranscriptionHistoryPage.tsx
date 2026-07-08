@@ -10,7 +10,8 @@ import {
 } from "@mui/material";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";import { useNavigate } from "react-router-dom";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import { useNavigate } from "react-router-dom";
 import {
   DataGrid,
   type GridColDef,
@@ -18,6 +19,10 @@ import {
 } from "@mui/x-data-grid";
 
 import { useAuth } from "../../auth";
+import AppSnackbar from "../../../components/ui/AppSnackbar";
+import ErrorBanner from "../../../components/ui/ErrorBanner";
+import PageHeader from "../../../components/ui/PageHeader";
+import { DataGridNoRowsOverlay, dataGridSlotProps, dataGridSx } from "../../../components/ui";
 import DeleteTranscriptionDialog from "../components/DeleteTranscriptionDialog";
 import AudioUploadCard from "../components/AudioUploadCard";
 import TranscriptionStatusChip from "../components/TranscriptionStatusChip";
@@ -35,7 +40,11 @@ const TranscriptionHistoryPage = () => {
   const canCreate = Boolean(user?.isSuperuser || user?.permissions.includes("transcriptions:create"));
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 20 });
   const [pendingDelete, setPendingDelete] = useState<Transcription | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const listQuery = useTranscriptions({
     page: paginationModel.page + 1,
@@ -63,9 +72,13 @@ const TranscriptionHistoryPage = () => {
           language: transcription.language ?? undefined,
         });
         await listQuery.refetch();
-        setFeedback({ type: "success", message: "Transcription started." });
+        setSnackbar({ open: true, message: "Transcription started.", severity: "success" });
       } catch (error) {
-        setFeedback({ type: "error", message: extractApiErrorMessage(error, "Could not start transcription.") });
+        setSnackbar({
+          open: true,
+          message: extractApiErrorMessage(error, "Could not start transcription."),
+          severity: "error",
+        });
       }
     },
     [listQuery, startTranscription]
@@ -155,7 +168,11 @@ const TranscriptionHistoryPage = () => {
     try {
       await listQuery.refetch();
     } catch {
-      setFeedback({ type: "error", message: "Transcription saved, but the history list could not be refreshed." });
+      setSnackbar({
+        open: true,
+        message: "Transcription saved, but the history list could not be refreshed.",
+        severity: "error",
+      });
     }
   };
 
@@ -163,38 +180,24 @@ const TranscriptionHistoryPage = () => {
     if (!pendingDelete) return;
     try {
       await deleteTranscription.mutateAsync(pendingDelete.id);
-      setFeedback({ type: "success", message: "Transcription deleted." });
+      setSnackbar({ open: true, message: "Transcription deleted.", severity: "success" });
       setPendingDelete(null);
     } catch {
-      setFeedback({ type: "error", message: "Could not delete transcription." });
+      setSnackbar({ open: true, message: "Could not delete transcription.", severity: "error" });
     }
   };
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" gap={2} sx={{ justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }} gutterBottom>
-            Transcription History
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Review, edit, and manage consultation speech-to-text results.
-          </Typography>
-        </Box>
-      </Stack>
-
-      {feedback && (
-        <Alert severity={feedback.type} onClose={() => setFeedback(null)}>
-          {feedback.message}
-        </Alert>
-      )}
+      <PageHeader
+        title="Transcription History"
+        subtitle="Review, edit, and manage consultation speech-to-text results."
+      />
 
       {canCreate && <AudioUploadCard onUploaded={() => void handleUploaded()} />}
 
       {listQuery.isError && (
-        <Alert severity="error" action={<Button onClick={() => void listQuery.refetch()}>Retry</Button>}>
-          Could not load transcription history.
-        </Alert>
+        <ErrorBanner message="Could not load transcription history." onRetry={() => void listQuery.refetch()} />
       )}
 
       <DataGrid
@@ -202,14 +205,16 @@ const TranscriptionHistoryPage = () => {
         columns={columns}
         getRowId={(row) => row.id}
         rowCount={listQuery.data?.total ?? 0}
-        loading={listQuery.isLoading}
+        loading={listQuery.isFetching}
         paginationMode="server"
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
         pageSizeOptions={[10, 20, 50]}
         disableRowSelectionOnClick
         autoHeight
-        sx={{ bgcolor: "background.paper" }}
+        slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+        slotProps={dataGridSlotProps}
+        sx={dataGridSx}
       />
 
       <DeleteTranscriptionDialog
@@ -217,6 +222,11 @@ const TranscriptionHistoryPage = () => {
         isDeleting={deleteTranscription.isPending}
         onConfirm={() => void handleConfirmDelete()}
         onClose={() => setPendingDelete(null)}
+      />
+
+      <AppSnackbar
+        state={snackbar}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
     </Stack>
   );

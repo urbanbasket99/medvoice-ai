@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import ConsultationDeleteDialog from "../components/ConsultationDeleteDialog";
@@ -82,21 +84,17 @@ const ConsultationListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Consultations
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Open, document, and complete patient consultations.
-          </Typography>
-        </Box>
-        {canCreate && (
-          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/consultations/new")}>
-            Start Consultation
-          </Button>
-        )}
-      </Stack>
+      <PageHeader
+        title="Consultations"
+        subtitle="Open, document, and complete patient consultations."
+        actions={
+          canCreate ? (
+            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/consultations/new")}>
+              Start Consultation
+            </Button>
+          ) : undefined
+        }
+      />
 
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "center" }, justifyContent: "space-between" }}>
         <Box sx={{ flex: 1, maxWidth: { md: 420 } }}>
@@ -116,6 +114,13 @@ const ConsultationListPage = () => {
           }}
         />
       </Stack>
+
+      {activeQuery.isError && (
+        <ErrorBanner
+          message="Failed to load consultations. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
+      )}
 
       <ConsultationTable
         rows={rows}

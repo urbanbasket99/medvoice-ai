@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import type { GridColDef } from "@mui/x-data-grid";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { extractApiErrorMessage } from "../../../lib/extractApiErrorMessage";
 import { useAuth } from "../../auth";
 import BatchForm from "../components/BatchForm";
@@ -183,7 +184,8 @@ const BatchManagementPage = () => {
           loading={batchesQuery.isFetching}
           disableRowSelectionOnClick
           autoHeight
-          sx={{ border: 0 }}
+          slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+          sx={dataGridSx}
         />
       )}
 

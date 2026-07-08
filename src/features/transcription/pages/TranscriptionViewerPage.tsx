@@ -15,6 +15,7 @@ import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../auth";
+import PageHeader from "../../../components/ui/PageHeader";
 import { extractApiErrorMessage } from "../../../lib/extractApiErrorMessage";
 import TranscriptEditor from "../components/TranscriptEditor";
 import {
@@ -98,14 +99,10 @@ const TranscriptionViewerPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" sx={{ fontWeight: 700 }} gutterBottom>
-          Transcription Viewer
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {transcription.consultationVisitNumber ?? transcription.consultationId} · {transcription.patientName ?? "Patient"}
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Transcription Viewer"
+        subtitle={`${transcription.consultationVisitNumber ?? transcription.consultationId} · ${transcription.patientName ?? "Patient"}`}
+      />
 
       {feedback && (
         <Alert severity={feedback.type} onClose={() => setFeedback(null)}>

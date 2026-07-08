@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import DispenseDeleteDialog from "../components/PharmacyDeleteDialog";
@@ -75,26 +77,22 @@ const DispenseListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Dispense Records
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Create, search, and manage pharmacy dispense records.
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button variant="outlined" onClick={() => navigate("/pharmacy/inventory")}>
-            Inventory
-          </Button>
-          {canCreate && (
-            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/pharmacy/dispense/new")}>
-              New Dispense
+      <PageHeader
+        title="Dispense Records"
+        subtitle="Create, search, and manage pharmacy dispense records."
+        actions={
+          <>
+            <Button variant="outlined" onClick={() => navigate("/pharmacy/inventory")}>
+              Inventory
             </Button>
-          )}
-        </Stack>
-      </Stack>
+            {canCreate ? (
+              <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/pharmacy/dispense/new")}>
+                New Dispense
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
       <Box sx={{ maxWidth: { md: 420 } }}>
         <TextField
@@ -119,24 +117,10 @@ const DispenseListPage = () => {
       </Box>
 
       {activeQuery.isError && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            bgcolor: "error.light",
-            color: "error.dark",
-          }}
-        >
-          <Typography variant="body2">Failed to load dispense records. Please try again.</Typography>
-          <Button size="small" color="error" onClick={() => void activeQuery.refetch()}>
-            Retry
-          </Button>
-        </Box>
+        <ErrorBanner
+          message="Failed to load dispense records. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
       )}
 
       <DispenseTable

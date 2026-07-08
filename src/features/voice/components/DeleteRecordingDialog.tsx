@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { VoiceRecording } from "../types/voice.types";
 import { formatRecordingDuration } from "../utils/voiceUtils";
 
@@ -14,10 +13,11 @@ const DeleteRecordingDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(recording)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Recording</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(recording)}
+    title="Delete Recording?"
+    message={
+      <>
         Permanently delete the recording for consultation{" "}
         <strong>{recording?.consultationVisitNumber ?? recording?.consultationId}</strong>
         {recording?.patientName ? (
@@ -33,17 +33,14 @@ const DeleteRecordingDialog = ({
             Duration: {formatRecordingDuration(recording.durationSeconds)}
           </>
         )}
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default DeleteRecordingDialog;

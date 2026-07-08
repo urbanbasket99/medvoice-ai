@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
+
+import { PageHeader } from "../../../components/ui";
 
 import PatientForm from "../components/PatientForm";
 import { useCreatePatient } from "../hooks/useCreatePatient";
@@ -63,14 +65,10 @@ const PatientRegistrationPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          Register Patient
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          A Medical Record Number (MRN) and Unique Health ID (UHID) are generated automatically on save.
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Register Patient"
+        subtitle="A Medical Record Number (MRN) and Unique Health ID (UHID) are generated automatically on save."
+      />
 
       <PatientForm
         defaultValues={patientFormDefaultValues}

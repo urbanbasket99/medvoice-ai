@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_v1_router
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
+from app.modules.audit.infrastructure.middleware.audit_middleware import AuditMiddleware
 
 
 def create_app() -> FastAPI:
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(AuditMiddleware)
 
     register_exception_handlers(app)
 

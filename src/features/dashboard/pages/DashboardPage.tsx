@@ -1,5 +1,6 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 
+import { PageHeader } from "../../../components/ui";
 import { useAuth } from "../../auth";
 import AiActivityCard from "../components/AiActivityCard";
 import AppointmentOverviewCard from "../components/AppointmentOverviewCard";
@@ -18,14 +19,10 @@ const DashboardPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h5" fontWeight={700}>
-          {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Here&apos;s what&apos;s happening across the hospital today.
-        </Typography>
-      </Box>
+      <PageHeader
+        title={firstName ? `Welcome back, ${firstName}` : "Welcome back"}
+        subtitle="Here's what's happening across the hospital today."
+      />
 
       <KpiSection />
 

@@ -47,7 +47,7 @@ export const getTypography = (): TypographyVariantsOptions => ({
   },
   h5: {
     fontSize: "1rem",
-    fontWeight: 600,
+    fontWeight: 700,
     lineHeight: 1.5,
   },
   h6: {

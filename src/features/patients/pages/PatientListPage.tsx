@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import PatientDeleteDialog from "../components/PatientDeleteDialog";
@@ -93,29 +95,17 @@ const PatientListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
-      >
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Patients
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Search, filter, and manage registered patients.
-          </Typography>
-        </Box>
-        {canCreate && (
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={() => navigate("/patients/new")}
-          >
-            Register Patient
-          </Button>
-        )}
-      </Stack>
+      <PageHeader
+        title="Patients"
+        subtitle="Search, filter, and manage registered patients."
+        actions={
+          canCreate ? (
+            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/patients/new")}>
+              Register Patient
+            </Button>
+          ) : undefined
+        }
+      />
 
       <Stack
         direction={{ xs: "column", md: "row" }}
@@ -141,24 +131,10 @@ const PatientListPage = () => {
       </Stack>
 
       {activeQuery.isError && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            bgcolor: "error.light",
-            color: "error.dark",
-          }}
-        >
-          <Typography variant="body2">Failed to load patients. Please try again.</Typography>
-          <Button size="small" color="error" onClick={() => void activeQuery.refetch()}>
-            Retry
-          </Button>
-        </Box>
+        <ErrorBanner
+          message="Failed to load patients. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
       )}
 
       <PatientTable

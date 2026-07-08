@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import BillingSnackbar from "../components/BillingSnackbar";
@@ -48,40 +50,21 @@ const OutstandingBillsPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/billing/invoices")}>
-          Back to Invoices
-        </Button>
-      </Stack>
-
-      <Box>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          Outstanding Bills
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Invoices with an outstanding balance requiring payment.
-        </Typography>
-      </Box>
+      <PageHeader
+        backAction={
+          <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/billing/invoices")}>
+            Back to Invoices
+          </Button>
+        }
+        title="Outstanding Bills"
+        subtitle="Invoices with an outstanding balance requiring payment."
+      />
 
       {outstandingQuery.isError && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            bgcolor: "error.light",
-            color: "error.dark",
-          }}
-        >
-          <Typography variant="body2">Failed to load outstanding bills. Please try again.</Typography>
-          <Button size="small" color="error" onClick={() => void outstandingQuery.refetch()}>
-            Retry
-          </Button>
-        </Box>
+        <ErrorBanner
+          message="Failed to load outstanding bills. Please try again."
+          onRetry={() => void outstandingQuery.refetch()}
+        />
       )}
 
       <InvoiceTable

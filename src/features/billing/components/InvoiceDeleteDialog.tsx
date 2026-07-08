@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { Invoice } from "../types/billing.types";
 
 const InvoiceDeleteDialog = ({
@@ -13,23 +12,21 @@ const InvoiceDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(invoice)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Invoice</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(invoice)}
+    title="Delete Invoice?"
+    message={
+      <>
         Delete invoice <strong>{invoice?.invoiceNumber}</strong> for{" "}
         <strong>{invoice?.patientName ?? "this patient"}</strong>? This action cannot be undone.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default InvoiceDeleteDialog;

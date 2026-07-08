@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
-import { Box, Button, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Button, Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { useQuery } from "@tanstack/react-query";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import { doctorsApi } from "../../doctors/api/doctorsApi";
@@ -139,36 +141,32 @@ const AppointmentListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Appointments
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Schedule, search, and manage patient appointments.
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={viewLayout}
-            onChange={(_, value: "table" | "calendar" | null) => value && setViewLayout(value)}
-          >
-            <ToggleButton value="table" aria-label="Table view">
-              <TableRowsRoundedIcon fontSize="small" sx={{ mr: 0.5 }} /> Table
-            </ToggleButton>
-            <ToggleButton value="calendar" aria-label="Calendar view">
-              <CalendarMonthRoundedIcon fontSize="small" sx={{ mr: 0.5 }} /> Calendar
-            </ToggleButton>
-          </ToggleButtonGroup>
-          {canCreate && (
-            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/appointments/new")}>
-              New Appointment
-            </Button>
-          )}
-        </Stack>
-      </Stack>
+      <PageHeader
+        title="Appointments"
+        subtitle="Schedule, search, and manage patient appointments."
+        actions={
+          <>
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={viewLayout}
+              onChange={(_, value: "table" | "calendar" | null) => value && setViewLayout(value)}
+            >
+              <ToggleButton value="table" aria-label="Table view">
+                <TableRowsRoundedIcon fontSize="small" sx={{ mr: 0.5 }} /> Table
+              </ToggleButton>
+              <ToggleButton value="calendar" aria-label="Calendar view">
+                <CalendarMonthRoundedIcon fontSize="small" sx={{ mr: 0.5 }} /> Calendar
+              </ToggleButton>
+            </ToggleButtonGroup>
+            {canCreate ? (
+              <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/appointments/new")}>
+                New Appointment
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "center" }, justifyContent: "space-between" }}>
         <Box sx={{ flex: 1, maxWidth: { md: 420 } }}>
@@ -188,6 +186,13 @@ const AppointmentListPage = () => {
           }}
         />
       </Stack>
+
+      {activeQuery.isError && (
+        <ErrorBanner
+          message="Failed to load appointments. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
+      )}
 
       {viewLayout === "table" ? (
         <AppointmentTable

@@ -8,6 +8,7 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
+import { DataGridNoRowsOverlay, dataGridSlotProps, dataGridSx } from "../../../components/ui";
 import PatientStatusChip from "./PatientStatusChip";
 import type { Gender, Patient } from "../types/patient.types";
 
@@ -177,9 +178,9 @@ const PatientTable = ({
       onSortModelChange={onSortModelChange}
       pageSizeOptions={[10, 20, 50, 100]}
       disableRowSelectionOnClick
-      slots={{ toolbar: PatientTableToolbar }}
-      slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-      sx={{ backgroundColor: "background.paper" }}
+      slots={{ toolbar: PatientTableToolbar, noRowsOverlay: DataGridNoRowsOverlay }}
+      slotProps={dataGridSlotProps}
+      sx={dataGridSx}
     />
   );
 };

@@ -5,6 +5,7 @@ import type { GridColDef, GridPaginationModel, GridSortModel } from "@mui/x-data
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import {
   formatDisplayDate,
   getPriorityChipColor,
@@ -126,7 +127,8 @@ const LabOrderTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

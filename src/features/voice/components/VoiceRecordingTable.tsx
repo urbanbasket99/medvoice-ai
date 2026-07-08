@@ -10,6 +10,7 @@ import {
   type GridSortModel,
 } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSlotProps, dataGridSx } from "../../../components/ui";
 import { voiceApi } from "../api/voiceApi";
 import VoiceRecordingStatusChip from "./VoiceRecordingStatusChip";
 import type { VoiceRecording } from "../types/voice.types";
@@ -147,7 +148,9 @@ const VoiceRecordingTable = ({
           pageSizeOptions={[10, 20, 50]}
           disableRowSelectionOnClick
           autoHeight
-          sx={{ bgcolor: "background.paper" }}
+          slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+          slotProps={dataGridSlotProps}
+          sx={dataGridSx}
         />
       </Box>
       {expandedId && (

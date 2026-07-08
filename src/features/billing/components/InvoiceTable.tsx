@@ -6,6 +6,7 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import {
   formatCurrency,
   formatDisplayDate,
@@ -133,7 +134,8 @@ const InvoiceTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

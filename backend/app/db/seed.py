@@ -149,6 +149,13 @@ PERMISSION_CATALOG: list[tuple[str, str]] = [
     ("billing:create", "Create invoices and record payments"),
     ("billing:update", "Update invoice records"),
     ("billing:delete", "Cancel (soft-delete) invoices"),
+    # Notifications bounded context (see app/modules/notifications).
+    ("notifications:read", "View and receive notifications"),
+    ("notifications:create", "Create notifications (admin/system)"),
+    ("notifications:update", "Mark notifications as read and manage preferences"),
+    ("notifications:delete", "Delete (soft-delete) notifications"),
+    # Audit bounded context (see app/modules/audit).
+    ("audit:read", "View audit logs and compliance reports"),
 ]
 
 DEFAULT_ADMIN_EMAIL = "admin@medvoice.com"

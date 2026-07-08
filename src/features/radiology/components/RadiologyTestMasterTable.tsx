@@ -3,6 +3,7 @@ import { Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { formatDisplayDate, formatPrice, IMAGING_CATEGORY_LABELS } from "../utils/radiologyUtils";
 import type { RadiologyTestMaster } from "../types/radiology.types";
 
@@ -74,7 +75,8 @@ const RadiologyTestMasterTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

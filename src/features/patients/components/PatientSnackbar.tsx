@@ -1,5 +1,4 @@
-import { Alert, Snackbar } from "@mui/material";
-
+import AppSnackbar from "../../../components/ui/AppSnackbar";
 import type { PatientSnackbarState } from "../hooks/usePatientSnackbar";
 
 export interface PatientSnackbarProps {
@@ -8,16 +7,7 @@ export interface PatientSnackbarProps {
 }
 
 const PatientSnackbar = ({ state, onClose }: PatientSnackbarProps) => (
-  <Snackbar
-    open={state.open}
-    autoHideDuration={4000}
-    onClose={onClose}
-    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-  >
-    <Alert onClose={onClose} severity={state.severity} variant="filled" sx={{ width: "100%" }}>
-      {state.message}
-    </Alert>
-  </Snackbar>
+  <AppSnackbar state={state} onClose={onClose} />
 );
 
 export default PatientSnackbar;

@@ -101,6 +101,11 @@ from app.modules.billing.domain.exceptions import (
     PaymentExceedsBalanceError,
     PaymentNotFoundError,
 )
+from app.modules.notifications.domain.exceptions import (
+    NotificationNotFoundError,
+    NotificationPreferenceNotFoundError,
+)
+from app.modules.audit.domain.exceptions import AuditLogNotFoundError
 
 _STATUS_BY_ERROR: dict[type[DomainError], int] = {
     InvalidCredentialsError: status.HTTP_401_UNAUTHORIZED,
@@ -168,6 +173,9 @@ _STATUS_BY_ERROR: dict[type[DomainError], int] = {
     PaymentNotFoundError: status.HTTP_404_NOT_FOUND,
     InvalidInvoiceStatusError: status.HTTP_409_CONFLICT,
     PaymentExceedsBalanceError: status.HTTP_409_CONFLICT,
+    NotificationNotFoundError: status.HTTP_404_NOT_FOUND,
+    NotificationPreferenceNotFoundError: status.HTTP_404_NOT_FOUND,
+    AuditLogNotFoundError: status.HTTP_404_NOT_FOUND,
 }
 
 _DEFAULT_MESSAGE_BY_ERROR: dict[type[DomainError], str] = {
@@ -236,6 +244,9 @@ _DEFAULT_MESSAGE_BY_ERROR: dict[type[DomainError], str] = {
     PaymentNotFoundError: "Payment not found.",
     InvalidInvoiceStatusError: "Invalid invoice status transition.",
     PaymentExceedsBalanceError: "Payment amount exceeds the outstanding balance.",
+    NotificationNotFoundError: "Notification not found.",
+    NotificationPreferenceNotFoundError: "Notification preferences not found.",
+    AuditLogNotFoundError: "Audit log entry not found.",
 }
 
 

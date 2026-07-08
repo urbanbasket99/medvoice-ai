@@ -5,6 +5,7 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { formatDisplayDate } from "../utils/prescriptionUtils";
 import type { Prescription } from "../types/prescription.types";
 
@@ -107,7 +108,8 @@ const PrescriptionTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

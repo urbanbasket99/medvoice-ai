@@ -1,12 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { Doctor } from "../types/doctor.types";
 
 export interface DoctorDeleteDialogProps {
@@ -17,23 +9,21 @@ export interface DoctorDeleteDialogProps {
 }
 
 const DoctorDeleteDialog = ({ doctor, isDeleting, onConfirm, onClose }: DoctorDeleteDialogProps) => (
-  <Dialog open={Boolean(doctor)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Deactivate Doctor</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
-        Are you sure you want to deactivate <strong>{doctor?.fullName}</strong> ({doctor?.doctorCode})?
-        This doctor will no longer appear in active listings.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deactivating…" : "Deactivate"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+  <ConfirmDialog
+    open={Boolean(doctor)}
+    title="Deactivate Doctor?"
+    message={
+      <>
+        Are you sure you want to deactivate <strong>{doctor?.fullName}</strong> ({doctor?.doctorCode})? This doctor
+        will no longer appear in active listings.
+      </>
+    }
+    confirmLabel="Deactivate"
+    confirmingLabel="Deactivating…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default DoctorDeleteDialog;

@@ -4,6 +4,7 @@ import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { CATEGORY_LABELS, formatDisplayDate, isLowStock } from "../utils/pharmacyUtils";
 import type { MedicineStock } from "../types/pharmacy.types";
 
@@ -93,7 +94,8 @@ const InventoryTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

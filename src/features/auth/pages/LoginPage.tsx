@@ -32,7 +32,7 @@ const LoginPage = () => {
         bgcolor: "background.default",
       }}
     >
-      <Card sx={{ width: "100%", maxWidth: 420 }} elevation={3}>
+      <Card sx={{ width: "100%", maxWidth: 420, boxShadow: (theme) => theme.customShadows.card }} elevation={0}>
         <CardContent sx={{ p: 4 }}>
           <Stack spacing={0.5} sx={{ mb: 3 }}>
             <Typography variant="h4" component="h1" fontWeight={700}>

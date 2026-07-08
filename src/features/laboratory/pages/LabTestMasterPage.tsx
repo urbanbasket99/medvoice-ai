@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
-import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import LabTestMasterTable from "../components/LabTestMasterTable";
 import { useLabTestSearch } from "../hooks/useLabTestSearch";
@@ -36,19 +38,15 @@ const LabTestMasterPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Lab Test Catalog
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Browse the active laboratory test master catalog.
-          </Typography>
-        </Box>
-        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/laboratory/orders")}>
-          Back to Lab Orders
-        </Button>
-      </Stack>
+      <PageHeader
+        title="Lab Test Catalog"
+        subtitle="Browse the active laboratory test master catalog."
+        actions={
+          <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/laboratory/orders")}>
+            Back to Lab Orders
+          </Button>
+        }
+      />
 
       <Box sx={{ maxWidth: { md: 420 } }}>
         <TextField
@@ -71,6 +69,10 @@ const LabTestMasterPage = () => {
           }}
         />
       </Box>
+
+      {activeQuery.isError && (
+        <ErrorBanner message="Failed to load lab test catalog." onRetry={() => void activeQuery.refetch()} />
+      )}
 
       <LabTestMasterTable
         rows={rows}

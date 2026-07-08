@@ -3,6 +3,7 @@ import { Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { formatDisplayDate, formatPrice, SAMPLE_TYPE_LABELS } from "../utils/laboratoryUtils";
 import type { LabTestMaster } from "../types/laboratory.types";
 
@@ -70,7 +71,8 @@ const LabTestMasterTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

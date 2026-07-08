@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { LabOrder } from "../types/laboratory.types";
 
 const LabOrderDeleteDialog = ({
@@ -13,24 +12,22 @@ const LabOrderDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(labOrder)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Lab Order</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(labOrder)}
+    title="Delete Lab Order?"
+    message={
+      <>
         Delete lab order <strong>{labOrder?.orderNumber}</strong> for <strong>{labOrder?.patientName}</strong>
         {labOrder?.consultationVisitNumber ? ` (Visit ${labOrder.consultationVisitNumber})` : ""}? This action cannot
         be undone.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default LabOrderDeleteDialog;

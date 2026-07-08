@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { MOVEMENT_TYPE_LABELS, formatDisplayDateTime } from "../utils/pharmacyUtils";
 import { useStockHistory } from "../hooks/useStock";
 import type { StockMovement } from "../types/pharmacy.types";
@@ -80,7 +81,8 @@ const StockHistoryPage = () => {
         pageSizeOptions={[10, 20, 50]}
         disableRowSelectionOnClick
         autoHeight
-        sx={{ border: 0 }}
+        slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+        sx={dataGridSx}
       />
     </Stack>
   );

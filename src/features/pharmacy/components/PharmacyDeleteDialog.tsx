@@ -1,7 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
-import type { DispenseRecord } from "../types/pharmacy.types";
-import type { PharmacyMedicine } from "../types/pharmacy.types";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
+import type { DispenseRecord, PharmacyMedicine } from "../types/pharmacy.types";
 
 export const DispenseDeleteDialog = ({
   dispense,
@@ -14,24 +12,22 @@ export const DispenseDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(dispense)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Dispense Record</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(dispense)}
+    title="Delete Dispense Record?"
+    message={
+      <>
         Delete dispense <strong>{dispense?.orderNumber}</strong> for <strong>{dispense?.patientName}</strong>
-        {dispense?.consultationVisitNumber ? ` (Visit ${dispense.consultationVisitNumber})` : ""}? This action
-        cannot be undone.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+        {dispense?.consultationVisitNumber ? ` (Visit ${dispense.consultationVisitNumber})` : ""}? This action cannot
+        be undone.
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export const MedicineDeleteDialog = ({
@@ -45,23 +41,20 @@ export const MedicineDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(medicine)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Medicine</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
-        Delete medicine <strong>{medicine?.brandName}</strong> ({medicine?.medicineCode})? This action cannot be
-        undone.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+  <ConfirmDialog
+    open={Boolean(medicine)}
+    title="Delete Medicine?"
+    message={
+      <>
+        Delete medicine <strong>{medicine?.brandName}</strong> ({medicine?.medicineCode})? This action cannot be undone.
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default DispenseDeleteDialog;

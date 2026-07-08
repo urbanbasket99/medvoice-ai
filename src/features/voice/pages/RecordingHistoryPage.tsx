@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
+import { Alert, Button, Stack } from "@mui/material";
 import MicRoundedIcon from "@mui/icons-material/MicRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 
+import AppSnackbar from "../../../components/ui/AppSnackbar";
+import ErrorBanner from "../../../components/ui/ErrorBanner";
+import PageHeader from "../../../components/ui/PageHeader";
 import { useAuth } from "../../auth";
 import DeleteRecordingDialog from "../components/DeleteRecordingDialog";
 import VoiceRecordingTable from "../components/VoiceRecordingTable";
@@ -29,7 +32,11 @@ const RecordingHistoryPage = () => {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 20 });
   const [sortModel, setSortModel] = useState<GridSortModel>(DEFAULT_SORT_MODEL);
   const [pendingDelete, setPendingDelete] = useState<VoiceRecording | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const sortEntry = sortModel[0];
   const sortBy = (sortEntry && SORT_FIELD_MAP[sortEntry.field]) || "created_at";
@@ -51,10 +58,10 @@ const RecordingHistoryPage = () => {
     if (!pendingDelete) return;
     try {
       await deleteRecording.mutateAsync(pendingDelete.id);
-      setFeedback({ type: "success", message: "Recording deleted successfully." });
+      setSnackbar({ open: true, message: "Recording deleted successfully.", severity: "success" });
       setPendingDelete(null);
     } catch {
-      setFeedback({ type: "error", message: "Could not delete the recording. Please try again." });
+      setSnackbar({ open: true, message: "Could not delete the recording. Please try again.", severity: "error" });
     }
   };
 
@@ -64,38 +71,26 @@ const RecordingHistoryPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={2}>
-        <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
-            Recording History
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Browse, play back, download, and manage saved consultation recordings.
-          </Typography>
-        </Box>
-        {canRecord && (
-          <Button variant="contained" startIcon={<MicRoundedIcon />} onClick={() => navigate("/voice/record")}>
-            New Recording
-          </Button>
-        )}
-      </Stack>
-
-      {feedback && (
-        <Alert severity={feedback.type} onClose={() => setFeedback(null)}>
-          {feedback.message}
-        </Alert>
-      )}
+      <PageHeader
+        title="Recording History"
+        subtitle="Browse, play back, download, and manage saved consultation recordings."
+        actions={
+          canRecord ? (
+            <Button variant="contained" startIcon={<MicRoundedIcon />} onClick={() => navigate("/voice/record")}>
+              New Recording
+            </Button>
+          ) : undefined
+        }
+      />
 
       {listQuery.isError && (
-        <Alert severity="error" action={<Button onClick={() => void listQuery.refetch()}>Retry</Button>}>
-          Could not load recordings.
-        </Alert>
+        <ErrorBanner message="Could not load recordings." onRetry={() => void listQuery.refetch()} />
       )}
 
       <VoiceRecordingTable
         rows={rows}
         rowCount={rowCount}
-        loading={listQuery.isLoading}
+        loading={listQuery.isFetching}
         paginationModel={paginationModel}
         sortModel={sortModel}
         onPaginationModelChange={setPaginationModel}
@@ -109,6 +104,11 @@ const RecordingHistoryPage = () => {
         isDeleting={deleteRecording.isPending}
         onConfirm={() => void handleConfirmDelete()}
         onClose={() => setPendingDelete(null)}
+      />
+
+      <AppSnackbar
+        state={{ ...snackbar, severity: snackbar.severity }}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
     </Stack>
   );

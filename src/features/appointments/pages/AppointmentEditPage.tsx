@@ -3,6 +3,7 @@ import { Alert, Box, Button, Stack, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
 
+import AppointmentDetailsSkeleton from "../components/AppointmentDetailsSkeleton";
 import AppointmentForm from "../components/AppointmentForm";
 import { useAppointment } from "../hooks/useAppointment";
 import { useUpdateAppointment } from "../hooks/useUpdateAppointment";
@@ -71,7 +72,7 @@ const AppointmentEditPage = () => {
   };
 
   if (isLoading) {
-    return <Alert severity="info">Loading appointment…</Alert>;
+    return <AppointmentDetailsSkeleton />;
   }
 
   if (isError || !appointment || !defaultValues) {

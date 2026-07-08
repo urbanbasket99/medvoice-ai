@@ -12,6 +12,7 @@ import MedicationRoundedIcon from "@mui/icons-material/MedicationRounded";
 import LocalPharmacyRoundedIcon from "@mui/icons-material/LocalPharmacyRounded";
 import ScienceRoundedIcon from "@mui/icons-material/ScienceRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
+import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
 import RadiologyRoundedIcon from "./features/radiology/icons/RadiologyRoundedIcon";
 
 import AppLayout from "./layout/AppLayout";
@@ -88,6 +89,13 @@ import {
   PaymentPage,
   OutstandingBillsPage,
 } from "./features/billing";
+import {
+  NotificationBell,
+  NotificationCenterPage,
+  NotificationToastProvider,
+} from "./features/notifications";
+import { AuditLogDetailsPage, AuditLogListPage } from "./features/audit";
+import { GlobalSearchBar } from "./features/search";
 
 const DASHBOARD_BREADCRUMBS: BreadcrumbItem[] = [{ id: "dashboard", label: "Dashboard" }];
 
@@ -117,6 +125,8 @@ const AuthenticatedShell = () => {
   const canReadRadiology = Boolean(user?.isSuperuser || user?.permissions.includes("radiology:read"));
   const canReadPharmacy = Boolean(user?.isSuperuser || user?.permissions.includes("pharmacy:read"));
   const canReadBilling = Boolean(user?.isSuperuser || user?.permissions.includes("billing:read"));
+  const canReadNotifications = Boolean(user?.isSuperuser || user?.permissions.includes("notifications:read"));
+  const canReadAudit = Boolean(user?.isSuperuser || user?.permissions.includes("audit:read"));
   const isPatientsSection = location.pathname.startsWith("/patients");
   const isDoctorsSection = location.pathname.startsWith("/doctors");
   const isAppointmentsSection = location.pathname.startsWith("/appointments");
@@ -129,6 +139,8 @@ const AuthenticatedShell = () => {
   const isRadiologySection = location.pathname.startsWith("/radiology");
   const isPharmacySection = location.pathname.startsWith("/pharmacy");
   const isBillingSection = location.pathname.startsWith("/billing");
+  const isNotificationsSection = location.pathname.startsWith("/notifications");
+  const isAuditSection = location.pathname.startsWith("/audit");
 
   const navItems = useMemo<NavItem[]>(() => {
     const items: NavItem[] = [
@@ -248,8 +260,17 @@ const AuthenticatedShell = () => {
       });
     }
 
+    if (canReadAudit) {
+      items.push({
+        id: "audit",
+        label: "Audit Logs",
+        icon: <ManageSearchRoundedIcon fontSize="small" />,
+        onClick: () => navigate("/audit/logs"),
+      });
+    }
+
     return items;
-  }, [navigate, canReadPatients, canReadDoctors, canReadAppointments, canReadConsultations, canReadPrescriptions, canReadLaboratory, canReadRadiology, canReadPharmacy, canReadBilling, canReadVoice, canRecordVoice, canReadAi, canReadTranscriptions]);
+  }, [navigate, canReadPatients, canReadDoctors, canReadAppointments, canReadConsultations, canReadPrescriptions, canReadLaboratory, canReadRadiology, canReadPharmacy, canReadBilling, canReadVoice, canRecordVoice, canReadAi, canReadTranscriptions, canReadNotifications, canReadAudit]);
 
   const patientsBreadcrumbs = useMemo<BreadcrumbItem[]>(
     () => [
@@ -347,7 +368,27 @@ const AuthenticatedShell = () => {
     [navigate]
   );
 
-  const activeNavId = isBillingSection
+  const notificationsBreadcrumbs = useMemo<BreadcrumbItem[]>(
+    () => [
+      { id: "dashboard", label: "Dashboard", onClick: () => navigate("/") },
+      { id: "notifications", label: "Notifications" },
+    ],
+    [navigate]
+  );
+
+  const auditBreadcrumbs = useMemo<BreadcrumbItem[]>(
+    () => [
+      { id: "dashboard", label: "Dashboard", onClick: () => navigate("/") },
+      { id: "audit", label: "Audit Logs" },
+    ],
+    [navigate]
+  );
+
+  const activeNavId = isAuditSection
+    ? "audit"
+    : isNotificationsSection
+    ? "notifications"
+    : isBillingSection
     ? "billing"
     : isPharmacySection
     ? "pharmacy"
@@ -372,7 +413,11 @@ const AuthenticatedShell = () => {
         : isPatientsSection
           ? "patients"
           : "dashboard";
-  const breadcrumbs = isBillingSection
+  const breadcrumbs = isAuditSection
+    ? auditBreadcrumbs
+    : isNotificationsSection
+    ? notificationsBreadcrumbs
+    : isBillingSection
     ? billingBreadcrumbs
     : isPharmacySection
     ? pharmacyBreadcrumbs
@@ -399,15 +444,25 @@ const AuthenticatedShell = () => {
           : DASHBOARD_BREADCRUMBS;
 
   return (
-    <AppLayout
-      title="MedVoice AI HMS"
-      navItems={navItems}
-      activeNavId={activeNavId}
-      breadcrumbs={breadcrumbs}
-      headerActions={user && <UserMenu user={user} onLogout={logout} />}
-    >
-      <Outlet />
-    </AppLayout>
+    <NotificationToastProvider>
+      <AppLayout
+        title="MedVoice AI HMS"
+        navItems={navItems}
+        activeNavId={activeNavId}
+        breadcrumbs={breadcrumbs}
+        headerActions={
+          user && (
+            <>
+              <GlobalSearchBar />
+              <NotificationBell />
+              <UserMenu user={user} onLogout={logout} />
+            </>
+          )
+        }
+      >
+        <Outlet />
+      </AppLayout>
+    </NotificationToastProvider>
   );
 };
 
@@ -535,6 +590,15 @@ function App() {
             <Route element={<ProtectedRoute requiredPermission="transcriptions:read" />}>
               <Route path="/transcriptions" element={<TranscriptionHistoryPage />} />
               <Route path="/transcriptions/:id" element={<TranscriptionViewerPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="notifications:read" />}>
+              <Route path="/notifications" element={<NotificationCenterPage />} />
+            </Route>
+
+            <Route element={<ProtectedRoute requiredPermission="audit:read" />}>
+              <Route path="/audit/logs" element={<AuditLogListPage />} />
+              <Route path="/audit/logs/:id" element={<AuditLogDetailsPage />} />
             </Route>
           </Route>
         </Route>

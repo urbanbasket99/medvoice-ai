@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Box, Button, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Chip, InputAdornment, Stack, TextField } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 
+import { DataGridNoRowsOverlay, dataGridSlotProps, dataGridSx, PageHeader } from "../../../components/ui";
 import { extractApiErrorMessage } from "../../../lib/extractApiErrorMessage";
 import { useAuth } from "../../auth";
 import MedicineForm from "../components/MedicineForm";
@@ -165,34 +166,30 @@ const MedicineMasterPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Medicine Master
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage pharmacy medicine catalog and pricing.
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button variant="outlined" onClick={() => navigate("/pharmacy/inventory")}>
-            Inventory
-          </Button>
-          {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => {
-                setEditingMedicine(null);
-                setServerError(null);
-                setFormOpen(true);
-              }}
-            >
-              Add Medicine
+      <PageHeader
+        title="Medicine Master"
+        subtitle="Manage pharmacy medicine catalog and pricing."
+        actions={
+          <>
+            <Button variant="outlined" onClick={() => navigate("/pharmacy/inventory")}>
+              Inventory
             </Button>
-          )}
-        </Stack>
-      </Stack>
+            {canCreate ? (
+              <Button
+                variant="contained"
+                startIcon={<AddRoundedIcon />}
+                onClick={() => {
+                  setEditingMedicine(null);
+                  setServerError(null);
+                  setFormOpen(true);
+                }}
+              >
+                Add Medicine
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
       <Box sx={{ maxWidth: { md: 420 } }}>
         <TextField
@@ -228,7 +225,9 @@ const MedicineMasterPage = () => {
         pageSizeOptions={[10, 20, 50]}
         disableRowSelectionOnClick
         autoHeight
-        sx={{ border: 0 }}
+        slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+        slotProps={dataGridSlotProps}
+        sx={dataGridSx}
       />
 
       <MedicineForm

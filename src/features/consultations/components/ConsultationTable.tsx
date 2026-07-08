@@ -5,6 +5,8 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
+
 import ConsultationStatusChip from "./ConsultationStatusChip";
 import { formatDisplayDate } from "../utils/consultationUtils";
 import type { Consultation } from "../types/consultation.types";
@@ -108,7 +110,8 @@ const ConsultationTable = ({
       pageSizeOptions={[10, 20, 50]}
       disableRowSelectionOnClick
       autoHeight
-      sx={{ border: 0 }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

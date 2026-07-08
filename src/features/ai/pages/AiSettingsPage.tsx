@@ -1,5 +1,6 @@
-import { Alert, Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Button, Skeleton, Stack } from "@mui/material";
 
+import PageHeader from "../../../components/ui/PageHeader";
 import { useAuth } from "../../auth";
 import AiSettingsForm from "../components/AiSettingsForm";
 import { useAiProviders } from "../hooks/useAiProviders";
@@ -12,8 +13,8 @@ const AiSettingsPage = () => {
 
   if (providersQuery.isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
+      <Stack spacing={3}>
+        <PageHeader title="AI Engine Settings" subtitle="Manage provider configuration and connectivity." />
         <Skeleton variant="rounded" height={320} />
         <Skeleton variant="rounded" height={180} />
       </Stack>
@@ -37,14 +38,10 @@ const AiSettingsPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          AI Engine Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage provider configuration, defaults, and connectivity for the reusable MedVoice AI abstraction layer.
-        </Typography>
-      </Box>
+      <PageHeader
+        title="AI Engine Settings"
+        subtitle="Manage provider configuration, defaults, and connectivity for the reusable MedVoice AI abstraction layer."
+      />
 
       <AiSettingsForm catalog={providersQuery.data} canUpdate={canUpdate} canTest={canTest} />
     </Stack>

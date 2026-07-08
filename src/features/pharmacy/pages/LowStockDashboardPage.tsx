@@ -1,6 +1,8 @@
-import { Alert, Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
+
+import { EmptyState, ErrorBanner, PageHeader } from "../../../components/ui";
 
 import StockCard from "../components/StockCard";
 import { useLowStock } from "../hooks/useStock";
@@ -12,35 +14,22 @@ const LowStockDashboardPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Low Stock Alerts
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Medicines at or below minimum stock levels.
-          </Typography>
-        </Box>
-        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/pharmacy/inventory")}>
-          Back to Inventory
-        </Button>
-      </Stack>
+      <PageHeader
+        title="Low Stock Alerts"
+        subtitle="Medicines at or below minimum stock levels."
+        actions={
+          <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/pharmacy/inventory")}>
+            Back to Inventory
+          </Button>
+        }
+      />
 
       {lowStockQuery.isError && (
-        <Alert
-          severity="error"
-          action={
-            <Button color="inherit" size="small" onClick={() => void lowStockQuery.refetch()}>
-              Retry
-            </Button>
-          }
-        >
-          Failed to load low stock alerts.
-        </Alert>
+        <ErrorBanner message="Failed to load low stock alerts." onRetry={() => void lowStockQuery.refetch()} />
       )}
 
       {lowStockQuery.isSuccess && items.length === 0 && (
-        <Alert severity="success">All medicines are above minimum stock levels.</Alert>
+        <EmptyState title="All medicines are above minimum stock levels." />
       )}
 
       <Box

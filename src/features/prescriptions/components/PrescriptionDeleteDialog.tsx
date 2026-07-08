@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { Prescription } from "../types/prescription.types";
 
 const PrescriptionDeleteDialog = ({
@@ -13,24 +12,22 @@ const PrescriptionDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(prescription)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Delete Prescription</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(prescription)}
+    title="Delete Prescription?"
+    message={
+      <>
         Delete prescription for <strong>{prescription?.patientName}</strong>
         {prescription?.consultationVisitNumber ? ` (Visit ${prescription.consultationVisitNumber})` : ""}? This action
         cannot be undone.
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>
-        Cancel
-      </Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Deleting…" : "Delete"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+      </>
+    }
+    confirmLabel="Delete"
+    confirmingLabel="Deleting…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default PrescriptionDeleteDialog;

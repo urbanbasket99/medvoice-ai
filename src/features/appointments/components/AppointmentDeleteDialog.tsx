@@ -1,5 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 import type { Appointment } from "../types/appointment.types";
 
 const AppointmentDeleteDialog = ({
@@ -13,21 +12,21 @@ const AppointmentDeleteDialog = ({
   onConfirm: () => void;
   onClose: () => void;
 }) => (
-  <Dialog open={Boolean(appointment)} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Cancel Appointment</DialogTitle>
-    <DialogContent>
-      <DialogContentText>
+  <ConfirmDialog
+    open={Boolean(appointment)}
+    title="Cancel Appointment?"
+    message={
+      <>
         Cancel appointment <strong>{appointment?.appointmentNumber}</strong> for{" "}
         <strong>{appointment?.patientName}</strong>?
-      </DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} disabled={isDeleting}>Keep</Button>
-      <Button color="error" variant="contained" onClick={onConfirm} disabled={isDeleting}>
-        {isDeleting ? "Cancelling…" : "Cancel Appointment"}
-      </Button>
-    </DialogActions>
-  </Dialog>
+      </>
+    }
+    confirmLabel="Cancel Appointment"
+    confirmingLabel="Cancelling…"
+    isPending={isDeleting}
+    onConfirm={onConfirm}
+    onClose={onClose}
+  />
 );
 
 export default AppointmentDeleteDialog;

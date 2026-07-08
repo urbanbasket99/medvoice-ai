@@ -12,6 +12,7 @@ import {
   ListItemText,
   Skeleton,
   Stack,
+  Typography,
 } from "@mui/material";
 
 import { useRecentPatients } from "../hooks/useDashboardData";
@@ -57,7 +58,13 @@ const RecentPatientsCard = () => {
           </Stack>
         )}
 
-        {!error && patients && (
+        {!error && patients && patients.length === 0 && (
+          <Typography variant="body2" color="text.secondary">
+            No recent patients to display.
+          </Typography>
+        )}
+
+        {!error && patients && patients.length > 0 && (
           <List disablePadding>
             {patients.map((patient, index) => (
               <ListItem

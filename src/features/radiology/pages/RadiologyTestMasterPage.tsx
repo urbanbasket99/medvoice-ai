@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
@@ -9,6 +9,8 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useNavigate } from "react-router-dom";
 
 import type { GridPaginationModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 
 
@@ -74,31 +76,15 @@ const RadiologyTestMasterPage = () => {
 
     <Stack spacing={3}>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-
-        <Box>
-
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-
-            Radiology Test Catalog
-
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-
-            Browse the active radiology test master catalog.
-
-          </Typography>
-
-        </Box>
-
-        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/radiology/orders")}>
-
-          Back to Radiology Orders
-
-        </Button>
-
-      </Stack>
+      <PageHeader
+        title="Radiology Test Catalog"
+        subtitle="Browse the active radiology test master catalog."
+        actions={
+          <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/radiology/orders")}>
+            Back to Radiology Orders
+          </Button>
+        }
+      />
 
 
 
@@ -144,7 +130,9 @@ const RadiologyTestMasterPage = () => {
 
       </Box>
 
-
+      {activeQuery.isError && (
+        <ErrorBanner message="Failed to load radiology test catalog." onRetry={() => void activeQuery.refetch()} />
+      )}
 
       <RadiologyTestMasterTable
 

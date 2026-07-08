@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import BiotechRoundedIcon from "@mui/icons-material/BiotechRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import LabOrderDeleteDialog from "../components/LabOrderDeleteDialog";
@@ -76,26 +78,22 @@ const LabOrderListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Lab Orders
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Create, search, and manage laboratory test orders.
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button variant="outlined" startIcon={<BiotechRoundedIcon />} onClick={() => navigate("/laboratory/tests")}>
-            Test Catalog
-          </Button>
-          {canCreate && (
-            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/laboratory/orders/new")}>
-              New Lab Order
+      <PageHeader
+        title="Lab Orders"
+        subtitle="Create, search, and manage laboratory test orders."
+        actions={
+          <>
+            <Button variant="outlined" startIcon={<BiotechRoundedIcon />} onClick={() => navigate("/laboratory/tests")}>
+              Test Catalog
             </Button>
-          )}
-        </Stack>
-      </Stack>
+            {canCreate ? (
+              <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/laboratory/orders/new")}>
+                New Lab Order
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
       <Box sx={{ maxWidth: { md: 420 } }}>
         <TextField
@@ -120,24 +118,10 @@ const LabOrderListPage = () => {
       </Box>
 
       {activeQuery.isError && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            bgcolor: "error.light",
-            color: "error.dark",
-          }}
-        >
-          <Typography variant="body2">Failed to load lab orders. Please try again.</Typography>
-          <Button size="small" color="error" onClick={() => void activeQuery.refetch()}>
-            Retry
-          </Button>
-        </Box>
+        <ErrorBanner
+          message="Failed to load lab orders. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
       )}
 
       <LabOrderTable

@@ -6,6 +6,7 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 
+import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
 import { DEPARTMENT_LABELS } from "../schemas/doctorSchema";
 import DoctorStatusChip from "./DoctorStatusChip";
 import type { Doctor, Gender } from "../types/doctor.types";
@@ -159,7 +160,8 @@ const DoctorTable = ({
       pageSizeOptions={[10, 20, 50, 100]}
       disableRowSelectionOnClick
       slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-      sx={{ backgroundColor: "background.paper" }}
+      slots={{ noRowsOverlay: DataGridNoRowsOverlay }}
+      sx={dataGridSx}
     />
   );
 };

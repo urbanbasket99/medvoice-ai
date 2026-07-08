@@ -69,21 +69,13 @@ setMedicalNotes(result.medicalNotes);
         mt: 5,
       }}
     >
-      <Card elevation={5}>
+      <Card variant="outlined" elevation={0}>
         <CardContent>
-
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            gutterBottom
-          >
-            🎤 MedVoice AI
+          <Typography variant="h5" component="h1" fontWeight={700} gutterBottom>
+            MedVoice AI
           </Typography>
 
-          <Typography
-            color="text.secondary"
-            mb={3}
-          >
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Speak naturally. AI will generate the transcript.
           </Typography>
 
@@ -146,32 +138,16 @@ setMedicalNotes(result.medicalNotes);
           )}
 
           {transcript && (
-            <Card
-              sx={{
-                mt: 4,
-                bgcolor: "#f5f5f5",
-              }}
-            >
-            
+            <Card variant="outlined" elevation={0} sx={{ mt: 4, bgcolor: (theme) => theme.surfaces.sunken }}>
               <CardContent>
-
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                >
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Transcript
                 </Typography>
-
-                <Typography>
-                  {transcript}
-                </Typography>
-
+                <Typography variant="body2">{transcript}</Typography>
               </CardContent>
             </Card>
           )}
-{transcript && (
-  <MedicalNotesCard medicalNotes={medicalNotes} />
-)}
+          {transcript && <MedicalNotesCard medicalNotes={medicalNotes} />}
         </CardContent>
       </Card>
     </Box>

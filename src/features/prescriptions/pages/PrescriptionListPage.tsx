@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
+
+import { ErrorBanner, PageHeader } from "../../../components/ui";
 
 import { useAuth } from "../../auth";
 import PrescriptionDeleteDialog from "../components/PrescriptionDeleteDialog";
@@ -75,21 +77,17 @@ const PrescriptionListPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Prescriptions
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Create, search, and manage patient prescriptions.
-          </Typography>
-        </Box>
-        {canCreate && (
-          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/prescriptions/new")}>
-            New Prescription
-          </Button>
-        )}
-      </Stack>
+      <PageHeader
+        title="Prescriptions"
+        subtitle="Create, search, and manage patient prescriptions."
+        actions={
+          canCreate ? (
+            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/prescriptions/new")}>
+              New Prescription
+            </Button>
+          ) : undefined
+        }
+      />
 
       <Box sx={{ maxWidth: { md: 420 } }}>
         <TextField
@@ -114,24 +112,10 @@ const PrescriptionListPage = () => {
       </Box>
 
       {activeQuery.isError && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1,
-            borderRadius: 1,
-            bgcolor: "error.light",
-            color: "error.dark",
-          }}
-        >
-          <Typography variant="body2">Failed to load prescriptions. Please try again.</Typography>
-          <Button size="small" color="error" onClick={() => void activeQuery.refetch()}>
-            Retry
-          </Button>
-        </Box>
+        <ErrorBanner
+          message="Failed to load prescriptions. Please try again."
+          onRetry={() => void activeQuery.refetch()}
+        />
       )}
 
       <PrescriptionTable

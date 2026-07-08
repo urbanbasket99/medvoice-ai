@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import {
   Alert,
   Autocomplete,
-  Box,
   CircularProgress,
   Stack,
   TextField,
@@ -10,6 +9,7 @@ import {
 } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+import PageHeader from "../../../components/ui/PageHeader";
 import { useAuth } from "../../auth";
 import { useConsultations } from "../../consultations/hooks/useConsultations";
 import type { Consultation } from "../../consultations/types/consultation.types";
@@ -57,19 +57,15 @@ const VoiceRecorderPage = () => {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          Voice Recorder
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Record consultation audio with pause, resume, and secure upload. No transcription is performed.
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Voice Recorder"
+        subtitle="Record consultation audio with pause, resume, and secure upload. No transcription is performed."
+      />
 
       <Autocomplete
         options={consultations}
         value={selectedConsultation}
-        loading={consultationsQuery.isLoading}
+        loading={consultationsQuery.isFetching}
         onChange={(_, value) => handleConsultationChange(value)}
         getOptionLabel={(option) => `${option.visitNumber} — ${option.patientName}`}
         isOptionEqualToValue={(option, value) => option.id === value.id}

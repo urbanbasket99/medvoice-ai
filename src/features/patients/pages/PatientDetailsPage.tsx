@@ -125,20 +125,38 @@ const PatientDetailsPage = () => {
 
   return (
     <Stack spacing={3}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
+        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/patients")}>
+          Back to Patients
+        </Button>
+        <Box sx={{ flex: 1 }} />
+        {canDelete && patient.status === "active" && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutlineRoundedIcon />}
+            onClick={() => setConfirmingDelete(true)}
+          >
+            Deactivate
+          </Button>
+        )}
+        {canUpdate && (
+          <Button
+            variant="contained"
+            startIcon={<EditRoundedIcon />}
+            onClick={() => navigate(`/patients/${patient.id}/edit`)}
+          >
+            Edit Patient
+          </Button>
+        )}
+      </Stack>
+
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
         sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
       >
         <Box>
-          <Button
-            size="small"
-            startIcon={<ArrowBackRoundedIcon fontSize="small" />}
-            onClick={() => navigate("/patients")}
-            sx={{ mb: 1 }}
-          >
-            Back to Patients
-          </Button>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
               {patient.fullName}
@@ -149,27 +167,6 @@ const PatientDetailsPage = () => {
             MRN {patient.mrn} &bull; UHID {patient.uhid} &bull; {patient.age} yrs
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1.5}>
-          {canDelete && patient.status === "active" && (
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteOutlineRoundedIcon />}
-              onClick={() => setConfirmingDelete(true)}
-            >
-              Deactivate
-            </Button>
-          )}
-          {canUpdate && (
-            <Button
-              variant="contained"
-              startIcon={<EditRoundedIcon />}
-              onClick={() => navigate(`/patients/${patient.id}/edit`)}
-            >
-              Edit Patient
-            </Button>
-          )}
-        </Stack>
       </Stack>
 
       <Card variant="outlined">

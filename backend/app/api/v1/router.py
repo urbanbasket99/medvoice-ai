@@ -23,6 +23,9 @@ from app.modules.pharmacy.presentation.dispenses_router import router as pharmac
 from app.modules.pharmacy.presentation.suppliers_router import router as pharmacy_suppliers_router
 from app.modules.billing.presentation.invoices_router import router as billing_invoices_router
 from app.modules.billing.presentation.payments_router import router as billing_payments_router
+from app.modules.notifications.presentation.router import router as notifications_router
+from app.modules.audit.presentation.router import router as audit_router
+from app.modules.search.presentation.router import router as search_router
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(auth_router)
@@ -46,3 +49,6 @@ api_v1_router.include_router(pharmacy_dispenses_router)
 api_v1_router.include_router(pharmacy_suppliers_router)
 api_v1_router.include_router(billing_invoices_router)
 api_v1_router.include_router(billing_payments_router)
+api_v1_router.include_router(notifications_router)
+api_v1_router.include_router(audit_router)
+api_v1_router.include_router(search_router)
