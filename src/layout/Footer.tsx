@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+
+import { APP_NAME, APP_VERSION } from "../lib/appMeta";
 
 export interface FooterProps {
   children?: ReactNode;
 }
 
-/**
- * Sticky footer: sits at the bottom of the scroll container, pushed below
- * short content and scrolled into view below long content (classic
- * flex-column "sticky footer" pattern — see AppLayout for the container).
- */
 const Footer = ({ children }: FooterProps) => {
   const year = new Date().getFullYear();
 
@@ -19,15 +16,24 @@ const Footer = ({ children }: FooterProps) => {
       sx={(theme) => ({
         flexShrink: 0,
         px: { xs: 2, sm: 3 },
-        py: 2,
+        py: 1.5,
         borderTop: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
       })}
     >
       {children ?? (
-        <Typography variant="caption" color="text.secondary">
-          © {year}. All rights reserved.
-        </Typography>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={0.5}
+          sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            © {year} {APP_NAME}. All rights reserved.
+          </Typography>
+          <Typography variant="caption" color="text.disabled">
+            Version {APP_VERSION}
+          </Typography>
+        </Stack>
       )}
     </Box>
   );

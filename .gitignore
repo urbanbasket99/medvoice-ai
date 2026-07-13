@@ -11,6 +11,23 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+!.env.example
+!.env.production.example
+
+# Docker runtime secrets
+docker/data
+
+# Test artifacts
+coverage
+htmlcov
+.coverage
+backend/htmlcov
+backend/.coverage
+backend/coverage.xml
+playwright-report
+test-results
+e2e/.auth/admin.json
 
 # Editor directories and files
 .vscode/*

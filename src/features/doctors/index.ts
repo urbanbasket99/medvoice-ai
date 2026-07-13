@@ -9,6 +9,7 @@ export { default as DoctorForm } from "./components/DoctorForm";
 export { default as DoctorFilters, EMPTY_DOCTOR_FILTERS } from "./components/DoctorFilters";
 export { default as DoctorStatusChip } from "./components/DoctorStatusChip";
 export { default as DoctorCard } from "./components/DoctorCard";
+export { default as DoctorAvailabilityEditor } from "./components/DoctorAvailabilityEditor";
 export { default as DoctorDeleteDialog } from "./components/DoctorDeleteDialog";
 export { default as DoctorSnackbar } from "./components/DoctorSnackbar";
 export { default as DoctorDetailsSkeleton } from "./components/DoctorDetailsSkeleton";
@@ -27,6 +28,8 @@ export type {
   CreateDoctorPayload,
   Department,
   Doctor,
+  DoctorAvailability,
+  DoctorAvailabilitySlot,
   DoctorListParams,
   DoctorListResult,
   DoctorSearchParams,
@@ -34,5 +37,6 @@ export type {
   DoctorStatus,
   Gender,
   SortDirection,
+  UpdateDoctorAvailabilityPayload,
   UpdateDoctorPayload,
 } from "./types/doctor.types";

@@ -17,20 +17,28 @@ import type {
   PharmacyMedicineListApiResponse,
   PharmacyMedicineSearchApiResponse,
   PharmacyMedicineUpdateRequestBody,
+  PharmacySupplierCreateRequestBody,
   PharmacySupplierListApiResponse,
+  PharmacySupplierUpdateRequestBody,
   StockAdjustRequestBody,
   StockHistoryListApiResponse,
   StockInventoryListApiResponse,
+  StockReturnRequestBody,
   DispenseItemApiResponse,
   DispenseStatusEventApiResponse,
   DispensePrintItemApiResponse,
   StockMovementApiResponse,
   PharmacySupplierApiResponse,
+  VendorPaymentApiResponse,
+  VendorPaymentCreateRequestBody,
+  VendorPaymentListApiResponse,
 } from "./pharmacyApi.types";
 import type {
   CreateBatchPayload,
   CreateDispensePayload,
   CreateMedicinePayload,
+  CreateSupplierPayload,
+  CreateVendorPaymentPayload,
   DispenseItem,
   DispenseItemPayload,
   DispenseListParams,
@@ -41,6 +49,7 @@ import type {
   DispenseSearchParams,
   DispenseStatus,
   DispenseStatusEvent,
+  DispenseType,
   MedicineCategory,
   MedicineStock,
   PharmacyBatch,
@@ -58,10 +67,16 @@ import type {
   StockInventoryListResult,
   StockMovement,
   StockMovementType,
+  StockReturnPayload,
   UpdateBatchPayload,
   UpdateDispensePayload,
   UpdateDispenseStatusPayload,
   UpdateMedicinePayload,
+  UpdateSupplierPayload,
+  VendorPayment,
+  VendorPaymentListParams,
+  VendorPaymentListResult,
+  VendorPaymentMethod,
 } from "../types/pharmacy.types";
 
 const toPriceString = (value: string | number | null | undefined): string | null => {
@@ -145,6 +160,7 @@ const toDispense = (response: DispenseRecordApiResponse): DispenseRecord => ({
   consultationId: response.consultation_id,
   patientId: response.patient_id,
   doctorId: response.doctor_id,
+  dispenseType: (response.dispense_type as DispenseType | undefined) ?? "prescription",
   dispensedBy: response.dispensed_by,
   status: response.status as DispenseStatus,
   notes: response.notes,
@@ -207,11 +223,27 @@ const toMovement = (response: StockMovementApiResponse): StockMovement => ({
 const toSupplier = (response: PharmacySupplierApiResponse): PharmacySupplier => ({
   id: response.id,
   name: response.name,
+  code: response.code ?? null,
   contactPerson: response.contact_person,
   phone: response.phone,
   email: response.email,
   address: response.address,
   isActive: response.is_active,
+  createdAt: response.created_at,
+  updatedAt: response.updated_at ?? null,
+});
+
+const toVendorPayment = (response: VendorPaymentApiResponse): VendorPayment => ({
+  id: response.id,
+  paymentNumber: response.payment_number,
+  supplierId: response.supplier_id,
+  supplierName: response.supplier_name ?? null,
+  amount: toPriceString(response.amount) ?? String(response.amount),
+  paymentDate: response.payment_date,
+  paymentMethod: response.payment_method as VendorPaymentMethod,
+  referenceNumber: response.reference_number,
+  notes: response.notes,
+  createdBy: response.created_by,
   createdAt: response.created_at,
 });
 
@@ -229,6 +261,14 @@ const emptyToNull = (value: string | null | undefined): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
+
+const normalizeSupplierList = (
+  data: PharmacySupplierApiResponse[] | PharmacySupplierListApiResponse
+): PharmacySupplierApiResponse[] => (Array.isArray(data) ? data : data.items);
+
+const normalizeVendorPaymentList = (
+  data: VendorPaymentApiResponse[] | VendorPaymentListApiResponse
+): VendorPaymentApiResponse[] => (Array.isArray(data) ? data : data.items);
 
 const toItemBody = (item: DispenseItemPayload): DispenseItemRequestBody => ({
   prescription_item_id: item.prescriptionItemId ?? null,
@@ -260,6 +300,13 @@ export const pharmacyApi = {
       params: { q: query, limit },
     });
     return { items: data.items.map(toMedicine) };
+  },
+
+  async getMedicineByBarcode(barcode: string): Promise<PharmacyMedicine> {
+    const { data } = await httpClient.get<PharmacyMedicineApiResponse>(
+      `/pharmacy/medicines/by-barcode/${encodeURIComponent(barcode)}`
+    );
+    return toMedicine(data);
   },
 
   async getMedicine(id: string): Promise<PharmacyMedicine> {
@@ -384,6 +431,34 @@ export const pharmacyApi = {
     };
   },
 
+  async purchaseReturn(payload: StockReturnPayload): Promise<MedicineStock> {
+    const body: StockReturnRequestBody = {
+      medicine_id: payload.medicineId,
+      batch_id: payload.batchId ?? null,
+      quantity: payload.quantity,
+      notes: emptyToNull(payload.notes ?? undefined),
+    };
+    const { data } = await httpClient.post<{ stock: MedicineStockApiResponse }>(
+      "/pharmacy/stock/returns/purchase",
+      body
+    );
+    return toStock(data.stock);
+  },
+
+  async salesReturn(payload: StockReturnPayload): Promise<MedicineStock> {
+    const body: StockReturnRequestBody = {
+      medicine_id: payload.medicineId,
+      batch_id: payload.batchId ?? null,
+      quantity: payload.quantity,
+      notes: emptyToNull(payload.notes ?? undefined),
+    };
+    const { data } = await httpClient.post<{ stock: MedicineStockApiResponse }>(
+      "/pharmacy/stock/returns/sales",
+      body
+    );
+    return toStock(data.stock);
+  },
+
   // Dispenses
   async listDispenses(params: DispenseListParams = {}): Promise<DispenseListResult> {
     const { data } = await httpClient.get<DispenseListApiResponse>("/pharmacy/dispenses", {
@@ -419,7 +494,9 @@ export const pharmacyApi = {
 
   async createDispense(payload: CreateDispensePayload): Promise<DispenseRecord> {
     const body: DispenseCreateRequestBody = {
-      prescription_id: payload.prescriptionId,
+      prescription_id: payload.prescriptionId ?? null,
+      patient_id: payload.patientId ?? null,
+      dispense_type: payload.dispenseType ?? "prescription",
       notes: emptyToNull(payload.notes ?? undefined),
       items: payload.items.map(toItemBody),
     };
@@ -474,8 +551,64 @@ export const pharmacyApi = {
   },
 
   // Suppliers
-  async listSuppliers(): Promise<PharmacySupplierListResult> {
-    const { data } = await httpClient.get<PharmacySupplierListApiResponse>("/pharmacy/suppliers");
-    return { items: data.items.map(toSupplier) };
+  async listSuppliers(activeOnly = true): Promise<PharmacySupplierListResult> {
+    const { data } = await httpClient.get<PharmacySupplierListApiResponse>("/pharmacy/suppliers", {
+      params: { active_only: activeOnly },
+    });
+    return { items: normalizeSupplierList(data).map(toSupplier) };
+  },
+
+  async getSupplier(id: string): Promise<PharmacySupplier> {
+    const { data } = await httpClient.get<PharmacySupplierApiResponse>(`/pharmacy/suppliers/${id}`);
+    return toSupplier(data);
+  },
+
+  async createSupplier(payload: CreateSupplierPayload): Promise<PharmacySupplier> {
+    const body: PharmacySupplierCreateRequestBody = {
+      name: payload.name,
+      code: emptyToNull(payload.code ?? undefined),
+      contact_person: emptyToNull(payload.contactPerson ?? undefined),
+      phone: emptyToNull(payload.phone ?? undefined),
+      email: emptyToNull(payload.email ?? undefined),
+      address: emptyToNull(payload.address ?? undefined),
+      is_active: payload.isActive ?? true,
+    };
+    const { data } = await httpClient.post<PharmacySupplierApiResponse>("/pharmacy/suppliers", body);
+    return toSupplier(data);
+  },
+
+  async updateSupplier(id: string, payload: UpdateSupplierPayload): Promise<PharmacySupplier> {
+    const body: PharmacySupplierUpdateRequestBody = {
+      name: payload.name,
+      code: emptyToNull(payload.code ?? undefined),
+      contact_person: emptyToNull(payload.contactPerson ?? undefined),
+      phone: emptyToNull(payload.phone ?? undefined),
+      email: emptyToNull(payload.email ?? undefined),
+      address: emptyToNull(payload.address ?? undefined),
+      is_active: payload.isActive,
+    };
+    const { data } = await httpClient.put<PharmacySupplierApiResponse>(`/pharmacy/suppliers/${id}`, body);
+    return toSupplier(data);
+  },
+
+  // Vendor payments
+  async listVendorPayments(params: VendorPaymentListParams = {}): Promise<VendorPaymentListResult> {
+    const { data } = await httpClient.get<VendorPaymentListApiResponse>("/pharmacy/vendor-payments", {
+      params: { supplier_id: params.supplierId },
+    });
+    return { items: normalizeVendorPaymentList(data).map(toVendorPayment) };
+  },
+
+  async createVendorPayment(payload: CreateVendorPaymentPayload): Promise<VendorPayment> {
+    const body: VendorPaymentCreateRequestBody = {
+      supplier_id: payload.supplierId,
+      amount: payload.amount,
+      payment_date: payload.paymentDate,
+      payment_method: payload.paymentMethod,
+      reference_number: emptyToNull(payload.referenceNumber ?? undefined),
+      notes: emptyToNull(payload.notes ?? undefined),
+    };
+    const { data } = await httpClient.post<VendorPaymentApiResponse>("/pharmacy/vendor-payments", body);
+    return toVendorPayment(data);
   },
 };

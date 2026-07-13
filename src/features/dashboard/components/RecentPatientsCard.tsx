@@ -59,7 +59,7 @@ const RecentPatientsCard = () => {
         )}
 
         {!error && patients && patients.length === 0 && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
             No recent patients to display.
           </Typography>
         )}

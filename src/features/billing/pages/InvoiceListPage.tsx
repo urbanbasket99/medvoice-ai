@@ -3,6 +3,8 @@ import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import { useNavigate } from "react-router-dom";
 import type { GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 
@@ -91,6 +93,20 @@ const InvoiceListPage = () => {
               onClick={() => navigate("/billing/outstanding")}
             >
               Outstanding Bills
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<BusinessRoundedIcon />}
+              onClick={() => navigate("/billing/tpas")}
+            >
+              TPAs
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<AssessmentRoundedIcon />}
+              onClick={() => navigate("/billing/reports")}
+            >
+              Reports
             </Button>
             {canCreate ? (
               <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/billing/invoices/new")}>

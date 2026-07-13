@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Chip } from "@mui/material";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import UndoRoundedIcon from "@mui/icons-material/UndoRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 
 import { DataGridNoRowsOverlay, dataGridSx } from "../../../components/ui";
@@ -15,6 +16,7 @@ export interface InventoryTableProps {
   paginationModel: GridPaginationModel;
   onPaginationModelChange: (model: GridPaginationModel) => void;
   onAdjust?: (stock: MedicineStock) => void;
+  onReturn?: (stock: MedicineStock) => void;
   canAdjust?: boolean;
 }
 
@@ -25,6 +27,7 @@ const InventoryTable = ({
   paginationModel,
   onPaginationModelChange,
   onAdjust,
+  onReturn,
   canAdjust = false,
 }: InventoryTableProps) => {
   const columns = useMemo<GridColDef<MedicineStock>[]>(() => {
@@ -61,25 +64,41 @@ const InventoryTable = ({
       },
     ];
 
-    if (canAdjust && onAdjust) {
+    if (canAdjust && (onAdjust || onReturn)) {
       base.push({
         field: "actions",
         type: "actions",
         headerName: "Actions",
-        width: 80,
-        getActions: (params) => [
-          <GridActionsCellItem
-            key="adjust"
-            icon={<TuneRoundedIcon />}
-            label="Adjust Stock"
-            onClick={() => onAdjust(params.row)}
-          />,
-        ],
+        width: 110,
+        getActions: (params) => {
+          const actions = [];
+          if (onAdjust) {
+            actions.push(
+              <GridActionsCellItem
+                key="adjust"
+                icon={<TuneRoundedIcon />}
+                label="Adjust Stock"
+                onClick={() => onAdjust(params.row)}
+              />
+            );
+          }
+          if (onReturn) {
+            actions.push(
+              <GridActionsCellItem
+                key="return"
+                icon={<UndoRoundedIcon />}
+                label="Stock Return"
+                onClick={() => onReturn(params.row)}
+              />
+            );
+          }
+          return actions;
+        },
       });
     }
 
     return base;
-  }, [canAdjust, onAdjust]);
+  }, [canAdjust, onAdjust, onReturn]);
 
   return (
     <DataGrid

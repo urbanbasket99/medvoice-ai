@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 import { PageHeader } from "../../../components/ui";
 import { useAuth } from "../../auth";

@@ -4,7 +4,7 @@ import type { PaletteMode, Theme } from "@mui/material/styles";
 import { breakpoints } from "./breakpoints";
 import { getComponents } from "./components";
 import { getClinicalTokens, getPalette, getSurfaceTokens } from "./palette";
-import type { ClinicalPalette, SurfaceTokens } from "./palette";
+import type { AppThemeMode, ClinicalPalette, SurfaceTokens } from "./palette";
 import { getCustomShadows, getShadows } from "./shadows";
 import type { CustomShadows } from "./shadows";
 import { layout, SPACING_BASE } from "./spacing";
@@ -65,20 +65,23 @@ declare module "@mui/material/Alert" {
  * for the given color mode. No feature code should call `createTheme`
  * directly — always go through this factory.
  */
-export const createAppTheme = (mode: PaletteMode = "light"): Theme =>
-  createTheme({
+export const createAppTheme = (mode: AppThemeMode = "light"): Theme => {
+  const paletteMode: PaletteMode = mode === "dark" ? "dark" : "light";
+
+  return createTheme({
     palette: getPalette(mode),
     typography: getTypography(),
     spacing: SPACING_BASE,
-    shape: { borderRadius: 8 },
+    shape: { borderRadius: 10 },
     breakpoints,
-    shadows: getShadows(mode),
+    shadows: getShadows(paletteMode),
     clinical: getClinicalTokens(mode),
     layout,
     surfaces: getSurfaceTokens(mode),
-    customShadows: getCustomShadows(mode),
+    customShadows: getCustomShadows(paletteMode),
     components: getComponents(),
   });
+};
 
 const theme = createAppTheme("light");
 

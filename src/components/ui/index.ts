@@ -1,4 +1,6 @@
 export { default as PageHeader } from "./PageHeader";
+export { default as PageContent } from "./PageContent";
+export { default as AppLogo } from "./AppLogo";
 export { default as ErrorBanner } from "./ErrorBanner";
 export { default as EmptyState } from "./EmptyState";
 export { default as AppSnackbar } from "./AppSnackbar";

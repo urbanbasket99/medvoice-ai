@@ -82,13 +82,24 @@ const DispenseListPage = () => {
         subtitle="Create, search, and manage pharmacy dispense records."
         actions={
           <>
+            <Button variant="outlined" onClick={() => navigate("/pharmacy/suppliers")}>
+              Suppliers
+            </Button>
+            <Button variant="outlined" onClick={() => navigate("/pharmacy/vendor-payments")}>
+              Payments
+            </Button>
             <Button variant="outlined" onClick={() => navigate("/pharmacy/inventory")}>
               Inventory
             </Button>
             {canCreate ? (
-              <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/pharmacy/dispense/new")}>
-                New Dispense
-              </Button>
+              <>
+                <Button variant="outlined" onClick={() => navigate("/pharmacy/dispense/retail")}>
+                  Retail billing
+                </Button>
+                <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/pharmacy/dispense/new")}>
+                  New Dispense
+                </Button>
+              </>
             ) : null}
           </>
         }

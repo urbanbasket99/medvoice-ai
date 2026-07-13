@@ -1,11 +1,19 @@
 import { httpClient } from "../../auth/api/httpClient";
-import type { DoctorApiResponse, DoctorListApiResponse, DoctorRequestBody } from "./doctorsApi.types";
+import type {
+  DoctorApiResponse,
+  DoctorAvailabilityApiResponse,
+  DoctorAvailabilityRequestBody,
+  DoctorListApiResponse,
+  DoctorRequestBody,
+} from "./doctorsApi.types";
 import type {
   CreateDoctorPayload,
   Doctor,
+  DoctorAvailability,
   DoctorListParams,
   DoctorListResult,
   DoctorSearchParams,
+  UpdateDoctorAvailabilityPayload,
   UpdateDoctorPayload,
 } from "../types/doctor.types";
 
@@ -115,6 +123,53 @@ export const doctorsApi = {
 
   async remove(id: string): Promise<void> {
     await httpClient.delete(`/doctors/${id}`);
+  },
+
+  async getAvailability(doctorId: string): Promise<DoctorAvailability> {
+    const { data } = await httpClient.get<DoctorAvailabilityApiResponse>(
+      `/doctors/${doctorId}/availability`
+    );
+    return {
+      doctorId: data.doctor_id,
+      slots: data.slots.map((slot) => ({
+        id: slot.id,
+        dayOfWeek: slot.day_of_week,
+        startTime: slot.start_time.slice(0, 5),
+        endTime: slot.end_time.slice(0, 5),
+        slotMinutes: slot.slot_minutes,
+        isActive: slot.is_active,
+      })),
+    };
+  },
+
+  async updateAvailability(
+    doctorId: string,
+    payload: UpdateDoctorAvailabilityPayload
+  ): Promise<DoctorAvailability> {
+    const body: DoctorAvailabilityRequestBody = {
+      slots: payload.slots.map((slot) => ({
+        day_of_week: slot.dayOfWeek,
+        start_time: slot.startTime.length === 5 ? `${slot.startTime}:00` : slot.startTime,
+        end_time: slot.endTime.length === 5 ? `${slot.endTime}:00` : slot.endTime,
+        slot_minutes: slot.slotMinutes,
+        is_active: slot.isActive,
+      })),
+    };
+    const { data } = await httpClient.put<DoctorAvailabilityApiResponse>(
+      `/doctors/${doctorId}/availability`,
+      body
+    );
+    return {
+      doctorId: data.doctor_id,
+      slots: data.slots.map((slot) => ({
+        id: slot.id,
+        dayOfWeek: slot.day_of_week,
+        startTime: slot.start_time.slice(0, 5),
+        endTime: slot.end_time.slice(0, 5),
+        slotMinutes: slot.slot_minutes,
+        isActive: slot.is_active,
+      })),
+    };
   },
 
   parseLanguages,

@@ -1,7 +1,7 @@
 import type { PaletteMode, PaletteOptions } from "@mui/material/styles";
 
 /**
- * Healthcare & semantic color tokens per DESIGN_SYSTEM.md §1.
+ * Enterprise healthcare color tokens — MedVoice AI Design System.
  */
 
 export interface ClinicalStatusToken {
@@ -32,7 +32,10 @@ export interface SurfaceTokens {
   sunken: string;
   raised: string;
   borderStrong: string;
+  border: string;
 }
+
+export type AppThemeMode = PaletteMode | "hospitalBlue";
 
 interface ColorGroup {
   primary: { main: string; light: string; dark: string; contrastText: string };
@@ -47,39 +50,46 @@ interface ColorGroup {
 }
 
 const lightColors: ColorGroup = {
-  primary: { main: "#0B6E99", light: "#E6F3F9", dark: "#084F6F", contrastText: "#FFFFFF" },
-  secondary: { main: "#5C6BC0", light: "#E8EAF6", dark: "#3F4BA8", contrastText: "#FFFFFF" },
-  success: { main: "#2E7D4F", light: "#E8F5EC", dark: "#1F5C39", contrastText: "#FFFFFF" },
-  warning: { main: "#B86E00", light: "#FFF4E5", dark: "#8F5600", contrastText: "#FFFFFF" },
-  error: { main: "#C62828", light: "#FDECEA", dark: "#8E1F1F", contrastText: "#FFFFFF" },
-  info: { main: "#0B6E99", light: "#E6F3F9", dark: "#084F6F", contrastText: "#FFFFFF" },
-  background: { default: "#F4F6F8", paper: "#FFFFFF" },
+  primary: { main: "#0F4C81", light: "#E8F1F8", dark: "#0A3559", contrastText: "#FFFFFF" },
+  secondary: { main: "#1976D2", light: "#E3F2FD", dark: "#115293", contrastText: "#FFFFFF" },
+  success: { main: "#2E7D32", light: "#E8F5E9", dark: "#1B5E20", contrastText: "#FFFFFF" },
+  warning: { main: "#ED6C02", light: "#FFF3E0", dark: "#E65100", contrastText: "#FFFFFF" },
+  error: { main: "#D32F2F", light: "#FFEBEE", dark: "#C62828", contrastText: "#FFFFFF" },
+  info: { main: "#0288D1", light: "#E1F5FE", dark: "#01579B", contrastText: "#FFFFFF" },
+  background: { default: "#F5F8FC", paper: "#FFFFFF" },
   text: { primary: "#1A2332", secondary: "#5A6A7E", disabled: "#9AA8B8" },
-  divider: "#ECEFF1",
+  divider: "#E5EAF2",
+};
+
+const hospitalBlueColors: ColorGroup = {
+  primary: { main: "#0F4C81", light: "#D6E8F5", dark: "#083A62", contrastText: "#FFFFFF" },
+  secondary: { main: "#1565C0", light: "#BBDEFB", dark: "#0D47A1", contrastText: "#FFFFFF" },
+  success: { main: "#2E7D32", light: "#E8F5E9", dark: "#1B5E20", contrastText: "#FFFFFF" },
+  warning: { main: "#ED6C02", light: "#FFF3E0", dark: "#E65100", contrastText: "#FFFFFF" },
+  error: { main: "#D32F2F", light: "#FFEBEE", dark: "#C62828", contrastText: "#FFFFFF" },
+  info: { main: "#0288D1", light: "#E1F5FE", dark: "#01579B", contrastText: "#FFFFFF" },
+  background: { default: "#EEF4FA", paper: "#FFFFFF" },
+  text: { primary: "#0D2137", secondary: "#4A6278", disabled: "#8FA3B8" },
+  divider: "#C8D9E8",
 };
 
 const darkColors: ColorGroup = {
-  primary: { main: "#4DA3CC", light: "#0B3D52", dark: "#7EC8E8", contrastText: "#0F1419" },
-  secondary: { main: "#9FA8DA", light: "#283593", dark: "#C5CAE9", contrastText: "#0F1419" },
-  success: { main: "#66BB6A", light: "#1B3D2A", dark: "#4C9950", contrastText: "#0F1419" },
-  warning: { main: "#FFA726", light: "#4D3800", dark: "#CC7A00", contrastText: "#0F1419" },
-  error: { main: "#EF5350", light: "#5C1A1A", dark: "#C62828", contrastText: "#0F1419" },
-  info: { main: "#4DA3CC", light: "#0B3D52", dark: "#7EC8E8", contrastText: "#0F1419" },
-  background: { default: "#0F1419", paper: "#1E2530" },
+  primary: { main: "#5B9BD5", light: "#1A3A52", dark: "#8BBCE8", contrastText: "#0F1419" },
+  secondary: { main: "#64B5F6", light: "#0D2F4A", dark: "#90CAF9", contrastText: "#0F1419" },
+  success: { main: "#66BB6A", light: "#1B3D2A", dark: "#4CAF50", contrastText: "#0F1419" },
+  warning: { main: "#FFA726", light: "#4D3800", dark: "#FF9800", contrastText: "#0F1419" },
+  error: { main: "#EF5350", light: "#5C1A1A", dark: "#F44336", contrastText: "#0F1419" },
+  info: { main: "#29B6F6", light: "#0B3D52", dark: "#03A9F4", contrastText: "#0F1419" },
+  background: { default: "#0F1419", paper: "#1A2332" },
   text: { primary: "#E8ECF0", secondary: "#9AA8B8", disabled: "#5A6A7E" },
   divider: "#2D3748",
 };
 
-/**
- * Neutral healthcare grays per DESIGN_SYSTEM.md §1.2 — a single fixed ramp
- * (light → dark) reused across both color modes, matching MUI's grey
- * convention where the scale itself does not invert with theme mode.
- */
 const grey = {
   50: "#F9FAFB",
-  100: "#F4F6F8",
-  200: "#ECEFF1",
-  300: "#DDE3EA",
+  100: "#F5F8FC",
+  200: "#E5EAF2",
+  300: "#D0D8E4",
   400: "#B0BEC9",
   500: "#9AA8B8",
   600: "#5A6A7E",
@@ -88,11 +98,21 @@ const grey = {
   900: "#0F1419",
 };
 
-export const getPalette = (mode: PaletteMode): PaletteOptions => {
-  const colors = mode === "dark" ? darkColors : lightColors;
+const resolveColors = (mode: AppThemeMode): ColorGroup => {
+  if (mode === "dark") return darkColors;
+  if (mode === "hospitalBlue") return hospitalBlueColors;
+  return lightColors;
+};
+
+const resolvePaletteMode = (mode: AppThemeMode): PaletteMode =>
+  mode === "dark" ? "dark" : "light";
+
+export const getPalette = (mode: AppThemeMode = "light"): PaletteOptions => {
+  const colors = resolveColors(mode);
+  const paletteMode = resolvePaletteMode(mode);
 
   return {
-    mode,
+    mode: paletteMode,
     primary: colors.primary,
     secondary: colors.secondary,
     success: colors.success,
@@ -105,64 +125,58 @@ export const getPalette = (mode: PaletteMode): PaletteOptions => {
     grey,
     action: {
       hover:
-        mode === "dark" ? "rgba(232, 236, 240, 0.08)" : "rgba(11, 110, 153, 0.06)",
+        paletteMode === "dark" ? "rgba(232, 236, 240, 0.08)" : "rgba(15, 76, 129, 0.06)",
       selected:
-        mode === "dark" ? "rgba(77, 163, 204, 0.16)" : "rgba(11, 110, 153, 0.10)",
+        paletteMode === "dark" ? "rgba(91, 155, 213, 0.16)" : "rgba(15, 76, 129, 0.10)",
       disabled: colors.text.disabled,
       disabledBackground:
-        mode === "dark" ? "rgba(232, 236, 240, 0.12)" : "rgba(26, 35, 50, 0.06)",
-      focus: mode === "dark" ? "rgba(77, 163, 204, 0.24)" : "rgba(11, 110, 153, 0.18)",
+        paletteMode === "dark" ? "rgba(232, 236, 240, 0.12)" : "rgba(26, 35, 50, 0.06)",
+      focus: paletteMode === "dark" ? "rgba(91, 155, 213, 0.24)" : "rgba(15, 76, 129, 0.18)",
     },
   };
 };
 
-/**
- * Clinical status colors per DESIGN_SYSTEM.md §1.5. These are fixed
- * (non-brand-swappable) so patient safety semantics never change.
- */
-export const getClinicalTokens = (mode: PaletteMode): ClinicalPalette => {
+export const getClinicalTokens = (mode: AppThemeMode): ClinicalPalette => {
   const isDark = mode === "dark";
 
   return {
     status: {
       normal: {
-        main: isDark ? "#66BB6A" : "#2E7D4F",
-        background: isDark ? "#1B3D2A" : "#E8F5EC",
+        main: isDark ? "#66BB6A" : "#2E7D32",
+        background: isDark ? "#1B3D2A" : "#E8F5E9",
       },
       abnormal: {
-        main: isDark ? "#FFA726" : "#B86E00",
-        background: isDark ? "#4D3800" : "#FFF4E5",
+        main: isDark ? "#FFA726" : "#ED6C02",
+        background: isDark ? "#4D3800" : "#FFF3E0",
       },
       critical: {
-        main: isDark ? "#EF5350" : "#C62828",
-        background: isDark ? "#5C1A1A" : "#FDECEA",
+        main: isDark ? "#EF5350" : "#D32F2F",
+        background: isDark ? "#5C1A1A" : "#FFEBEE",
       },
       info: {
-        main: isDark ? "#4DA3CC" : "#0B6E99",
-        background: isDark ? "#0B3D52" : "#E6F3F9",
+        main: isDark ? "#29B6F6" : "#0288D1",
+        background: isDark ? "#0B3D52" : "#E1F5FE",
       },
       neutral: {
         main: isDark ? "#9AA8B8" : "#5A6A7E",
-        background: isDark ? "#2D3748" : "#ECEFF1",
+        background: isDark ? "#2D3748" : "#E5EAF2",
       },
     },
     allergy: {
-      bannerBackground: isDark ? "#5C1A1A" : "#FDECEA",
-      bannerBorder: isDark ? "#EF5350" : "#C62828",
-      bannerText: isDark ? "#FF8A80" : "#8E1F1F",
+      bannerBackground: isDark ? "#5C1A1A" : "#FFEBEE",
+      bannerBorder: isDark ? "#EF5350" : "#D32F2F",
+      bannerText: isDark ? "#FF8A80" : "#B71C1C",
     },
     ai: {
-      panelBackground: isDark ? "#283593" : "#E8EAF6",
-      recording: isDark ? "#EF5350" : "#C62828",
+      panelBackground: isDark ? "#1A3A52" : "#E8F1F8",
+      recording: isDark ? "#EF5350" : "#D32F2F",
     },
   };
 };
 
-/**
- * Additional surface/border tokens referenced by component overrides
- * (sunken inputs, table headers, raised modals, strong borders).
- */
-export const getSurfaceTokens = (mode: PaletteMode): SurfaceTokens =>
-  mode === "dark"
-    ? { sunken: "#161B22", raised: "#252D3A", borderStrong: "#4A5568" }
-    : { sunken: "#F9FAFB", raised: "#FFFFFF", borderStrong: "#B0BEC9" };
+export const getSurfaceTokens = (mode: AppThemeMode): SurfaceTokens => {
+  if (mode === "dark") {
+    return { sunken: "#161B22", raised: "#252D3A", borderStrong: "#4A5568", border: "#2D3748" };
+  }
+  return { sunken: "#F5F8FC", raised: "#FFFFFF", borderStrong: "#B0BEC9", border: "#E5EAF2" };
+};

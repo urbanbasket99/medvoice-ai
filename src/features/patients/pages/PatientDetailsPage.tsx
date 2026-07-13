@@ -7,16 +7,24 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Divider,
+  Link,
+  List,
+  ListItem,
+  ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../auth";
+import { useAppointments } from "../../appointments/hooks/useAppointments";
+import { useConsultations } from "../../consultations/hooks/useConsultations";
+import { useInvoices } from "../../billing/hooks/useInvoices";
 import PatientDeleteDialog from "../components/PatientDeleteDialog";
 import PatientDetailsSkeleton from "../components/PatientDetailsSkeleton";
 import PatientSnackbar from "../components/PatientSnackbar";
@@ -46,28 +54,70 @@ const detailGridSx = {
   gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" },
 } as const;
 
-interface PlaceholderSection {
-  id: string;
+const formatShortDate = (value: string | null | undefined): string => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+};
+
+interface ChartSectionProps {
   title: string;
-  description: string;
+  loading: boolean;
+  error: boolean;
+  onRetry: () => void;
+  emptyMessage: string;
+  children: ReactNode;
+  viewAllHref?: string;
 }
 
-/**
- * Timeline, Appointments, Consultations, AI Notes, and Billing are
- * intentionally out of scope for Patient Management Phase 1 — these cards
- * are placeholders reserved for their respective future modules.
- */
-const PLACEHOLDER_SECTIONS: PlaceholderSection[] = [
-  { id: "timeline", title: "Timeline", description: "Chronological patient activity \u2014 coming soon." },
-  {
-    id: "appointments",
-    title: "Appointments",
-    description: "Scheduled and past appointments \u2014 coming soon.",
-  },
-  { id: "consultations", title: "Consultations", description: "Consultation history \u2014 coming soon." },
-  { id: "ai-notes", title: "AI Notes", description: "AI-generated medical notes \u2014 coming soon." },
-  { id: "billing", title: "Billing", description: "Invoices and payments \u2014 coming soon." },
-];
+const ChartSection = ({
+  title,
+  loading,
+  error,
+  onRetry,
+  emptyMessage,
+  children,
+  viewAllHref,
+}: ChartSectionProps) => (
+  <Card variant="outlined">
+    <CardHeader
+      title={title}
+      action={
+        viewAllHref ? (
+          <Button size="small" component={RouterLink} to={viewAllHref}>
+            View all
+          </Button>
+        ) : undefined
+      }
+    />
+    <Divider />
+    <CardContent>
+      {loading ? (
+        <Stack sx={{ alignItems: "center", py: 2 }}>
+          <CircularProgress size={24} />
+        </Stack>
+      ) : error ? (
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={onRetry}>
+              Retry
+            </Button>
+          }
+        >
+          Could not load {title.toLowerCase()}.
+        </Alert>
+      ) : (
+        children ?? (
+          <Typography variant="body2" color="text.secondary">
+            {emptyMessage}
+          </Typography>
+        )
+      )}
+    </CardContent>
+  </Card>
+);
 
 const PatientDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,10 +125,18 @@ const PatientDetailsPage = () => {
   const { user } = useAuth();
   const canUpdate = Boolean(user?.isSuperuser || user?.permissions.includes("patients:update"));
   const canDelete = Boolean(user?.isSuperuser || user?.permissions.includes("patients:delete"));
+  const canReadAppointments = Boolean(user?.isSuperuser || user?.permissions.includes("appointments:read"));
+  const canReadConsultations = Boolean(user?.isSuperuser || user?.permissions.includes("consultations:read"));
+  const canReadBilling = Boolean(user?.isSuperuser || user?.permissions.includes("billing:read"));
+
   const { data: patient, isLoading, isError, refetch } = usePatient(id);
   const deletePatient = useDeletePatient();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { snackbar, showSuccess, showError, closeSnackbar } = usePatientSnackbar();
+
+  const appointmentsQuery = useAppointments({ patientId: id, page: 1, pageSize: 5 });
+  const consultationsQuery = useConsultations({ patientId: id, page: 1, pageSize: 5 });
+  const invoicesQuery = useInvoices({ patientId: id, page: 1, pageSize: 5 });
 
   useConsumeFlashMessage(showSuccess);
 
@@ -122,6 +180,10 @@ const PatientDetailsPage = () => {
   ]
     .filter(Boolean)
     .join(", ");
+
+  const appointments = appointmentsQuery.data?.items ?? [];
+  const consultations = consultationsQuery.data?.items ?? [];
+  const invoices = invoicesQuery.data?.items ?? [];
 
   return (
     <Stack spacing={3}>
@@ -247,17 +309,101 @@ const PatientDetailsPage = () => {
       </Card>
 
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" } }}>
-        {PLACEHOLDER_SECTIONS.map((section) => (
-          <Card key={section.id} variant="outlined" sx={{ opacity: 0.7 }}>
-            <CardHeader title={section.title} />
-            <Divider />
-            <CardContent>
-              <Typography variant="body2" color="text.secondary">
-                {section.description}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
+        {canReadAppointments && (
+          <ChartSection
+            title="Appointments"
+            loading={appointmentsQuery.isLoading}
+            error={appointmentsQuery.isError}
+            onRetry={() => void appointmentsQuery.refetch()}
+            emptyMessage="No appointments for this patient."
+            viewAllHref="/appointments"
+          >
+            {appointments.length > 0 ? (
+              <List dense disablePadding>
+                {appointments.map((appointment) => (
+                  <ListItem key={appointment.id} disableGutters>
+                    <ListItemText
+                      primary={
+                        <Link component={RouterLink} to={`/appointments/${appointment.id}`} underline="hover">
+                          {appointment.appointmentNumber}
+                        </Link>
+                      }
+                      secondary={`${formatShortDate(appointment.appointmentDate)} • ${appointment.appointmentTime} • ${appointment.status}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : null}
+          </ChartSection>
+        )}
+
+        {canReadConsultations && (
+          <ChartSection
+            title="Consultations"
+            loading={consultationsQuery.isLoading}
+            error={consultationsQuery.isError}
+            onRetry={() => void consultationsQuery.refetch()}
+            emptyMessage="No consultations for this patient."
+            viewAllHref="/consultations"
+          >
+            {consultations.length > 0 ? (
+              <List dense disablePadding>
+                {consultations.map((consultation) => (
+                  <ListItem key={consultation.id} disableGutters>
+                    <ListItemText
+                      primary={
+                        <Link component={RouterLink} to={`/consultations/${consultation.id}`} underline="hover">
+                          {consultation.visitNumber}
+                        </Link>
+                      }
+                      secondary={`${consultation.doctorName ?? "Doctor"} • ${consultation.status}${
+                        consultation.diagnosis ? ` • ${consultation.diagnosis}` : ""
+                      }`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : null}
+          </ChartSection>
+        )}
+
+        {canReadBilling && (
+          <ChartSection
+            title="Billing"
+            loading={invoicesQuery.isLoading}
+            error={invoicesQuery.isError}
+            onRetry={() => void invoicesQuery.refetch()}
+            emptyMessage="No invoices for this patient."
+            viewAllHref="/billing/invoices"
+          >
+            {invoices.length > 0 ? (
+              <List dense disablePadding>
+                {invoices.map((invoice) => (
+                  <ListItem key={invoice.id} disableGutters>
+                    <ListItemText
+                      primary={
+                        <Link component={RouterLink} to={`/billing/invoices/${invoice.id}`} underline="hover">
+                          {invoice.invoiceNumber}
+                        </Link>
+                      }
+                      secondary={`${formatShortDate(invoice.invoiceDate)} • ${invoice.status} • ₹${invoice.grandTotal}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : null}
+          </ChartSection>
+        )}
+
+        <Card variant="outlined" sx={{ opacity: 0.7 }}>
+          <CardHeader title="Timeline" />
+          <Divider />
+          <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              Chronological patient activity — coming soon.
+            </Typography>
+          </CardContent>
+        </Card>
       </Box>
 
       <PatientDeleteDialog

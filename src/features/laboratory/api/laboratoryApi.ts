@@ -10,6 +10,10 @@ import type {
   LabOrderStatusEventApiResponse,
   LabOrderStatusUpdateRequestBody,
   LabOrderUpdateRequestBody,
+  LabResultsPrintApiResponse,
+  LabResultsUpdateRequestBody,
+  LabResultsEmailRequestBody,
+  ReportEmailDeliveryApiResponse,
   LabTestListApiResponse,
   LabTestMasterApiResponse,
   LabTestSearchApiResponse,
@@ -26,6 +30,8 @@ import type {
   LabOrderSearchParams,
   LabOrderStatusEvent,
   LabPriority,
+  LabResultFlag,
+  LabResultsPrintData,
   LabStatus,
   LabTestListParams,
   LabTestListResult,
@@ -34,6 +40,9 @@ import type {
   SampleType,
   UpdateLabOrderPayload,
   UpdateLabOrderStatusPayload,
+  UpdateLabResultsPayload,
+  SendLabResultsEmailPayload,
+  ReportEmailDelivery,
 } from "../types/laboratory.types";
 
 const toLabOrderItem = (response: LabOrderItemApiResponse): LabOrderItem => ({
@@ -45,6 +54,14 @@ const toLabOrderItem = (response: LabOrderItemApiResponse): LabOrderItem => ({
   sampleType: response.sample_type as SampleType,
   instructions: response.instructions,
   sortOrder: response.sort_order,
+  resultValue: response.result_value ?? null,
+  resultUnit: response.result_unit ?? null,
+  referenceRange: response.reference_range ?? null,
+  resultFlag: (response.result_flag as LabResultFlag | null | undefined) ?? null,
+  resultNotes: response.result_notes ?? null,
+  resultedAt: response.resulted_at ?? null,
+  resultedBy: response.resulted_by ?? null,
+  sampleBarcode: response.sample_barcode ?? null,
 });
 
 const toStatusEvent = (response: LabOrderStatusEventApiResponse): LabOrderStatusEvent => ({
@@ -75,6 +92,7 @@ const toLabOrder = (response: LabOrderApiResponse): LabOrder => ({
   doctorCode: response.doctor_code,
   doctorSpecialization: response.doctor_specialization,
   consultationVisitNumber: response.consultation_visit_number,
+  isPartialReport: response.is_partial_report ?? false,
   items: response.items.map(toLabOrderItem),
   statusHistory: response.status_history.map(toStatusEvent),
 });
@@ -104,6 +122,33 @@ const toPrintItem = (response: LabOrderPrintItemApiResponse): LabOrderPrintItem 
   category: response.category,
   sampleType: response.sample_type,
   instructions: response.instructions,
+  resultValue: response.result_value ?? null,
+  resultUnit: response.result_unit ?? null,
+  referenceRange: response.reference_range ?? null,
+  resultFlag: response.result_flag ?? null,
+  resultNotes: response.result_notes ?? null,
+});
+
+const toPrintData = (
+  data: LabOrderPrintApiResponse | LabResultsPrintApiResponse
+): LabOrderPrintData => ({
+  labOrderId: data.lab_order_id,
+  orderNumber: data.order_number,
+  consultationId: data.consultation_id,
+  priority: data.priority,
+  status: data.status,
+  clinicalNotes: data.clinical_notes,
+  patientName: data.patient_name,
+  patientMrn: data.patient_mrn,
+  patientUhid: data.patient_uhid,
+  patientGender: data.patient_gender,
+  patientDateOfBirth: data.patient_date_of_birth,
+  doctorName: data.doctor_name,
+  doctorCode: data.doctor_code,
+  doctorSpecialization: data.doctor_specialization,
+  consultationVisitNumber: data.consultation_visit_number,
+  items: data.items.map(toPrintItem),
+  createdAt: data.created_at,
 });
 
 const emptyToNull = (value: string | null | undefined): string | null => {
@@ -180,31 +225,57 @@ export const laboratoryApi = {
     return toLabOrder(data);
   },
 
+  async updateResults(id: string, payload: UpdateLabResultsPayload): Promise<LabOrder> {
+    const body: LabResultsUpdateRequestBody = {
+      items: payload.items.map((item) => ({
+        id: item.id,
+        result_value: emptyToNull(item.resultValue ?? undefined),
+        result_unit: emptyToNull(item.resultUnit ?? undefined),
+        reference_range: emptyToNull(item.referenceRange ?? undefined),
+        result_flag: item.resultFlag ?? null,
+        result_notes: emptyToNull(item.resultNotes ?? undefined),
+        sample_barcode: emptyToNull(item.sampleBarcode ?? undefined),
+      })),
+      is_partial_report: payload.isPartialReport ?? false,
+    };
+    const { data } = await httpClient.patch<LabOrderApiResponse>(`/lab-orders/${id}/results`, body);
+    return toLabOrder(data);
+  },
+
+  async emailResults(id: string, payload: SendLabResultsEmailPayload): Promise<ReportEmailDelivery> {
+    const body: LabResultsEmailRequestBody = {
+      recipient_email: payload.recipientEmail,
+      recipient_role: payload.recipientRole ?? null,
+    };
+    const { data } = await httpClient.post<ReportEmailDeliveryApiResponse>(
+      `/lab-orders/${id}/results/email`,
+      body
+    );
+    return {
+      id: data.id,
+      resourceType: data.resource_type,
+      resourceId: data.resource_id,
+      recipientEmail: data.recipient_email,
+      recipientRole: data.recipient_role,
+      subject: data.subject,
+      status: data.status,
+      sentAt: data.sent_at,
+      createdAt: data.created_at,
+    };
+  },
+
   async remove(id: string): Promise<void> {
     await httpClient.delete(`/lab-orders/${id}`);
   },
 
   async getPrintData(id: string): Promise<LabOrderPrintData> {
     const { data } = await httpClient.get<LabOrderPrintApiResponse>(`/lab-orders/${id}/print`);
-    return {
-      labOrderId: data.lab_order_id,
-      orderNumber: data.order_number,
-      consultationId: data.consultation_id,
-      priority: data.priority,
-      status: data.status,
-      clinicalNotes: data.clinical_notes,
-      patientName: data.patient_name,
-      patientMrn: data.patient_mrn,
-      patientUhid: data.patient_uhid,
-      patientGender: data.patient_gender,
-      patientDateOfBirth: data.patient_date_of_birth,
-      doctorName: data.doctor_name,
-      doctorCode: data.doctor_code,
-      doctorSpecialization: data.doctor_specialization,
-      consultationVisitNumber: data.consultation_visit_number,
-      items: data.items.map(toPrintItem),
-      createdAt: data.created_at,
-    };
+    return toPrintData(data);
+  },
+
+  async getResultsPrintData(id: string): Promise<LabResultsPrintData> {
+    const { data } = await httpClient.get<LabResultsPrintApiResponse>(`/lab-orders/${id}/results/print`);
+    return toPrintData(data);
   },
 
   async searchLabTests(query: string, limit = 20): Promise<LabTestSearchResult> {

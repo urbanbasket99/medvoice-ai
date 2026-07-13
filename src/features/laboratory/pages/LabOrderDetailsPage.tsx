@@ -26,6 +26,9 @@ import LabOrderDetailsSkeleton from "../components/LabOrderDetailsSkeleton";
 import LabOrderForm from "../components/LabOrderForm";
 import LabOrderSnackbar from "../components/LabOrderSnackbar";
 import LabRequisitionPrint from "../components/LabRequisitionPrint";
+import LabResultsForm from "../components/LabResultsForm";
+import LabResultsEmail from "../components/LabResultsEmail";
+import LabResultsPrint from "../components/LabResultsPrint";
 import StatusTimeline from "../components/StatusTimeline";
 import { useConsumeFlashMessage } from "../hooks/useConsumeFlashMessage";
 import { useDeleteLabOrder } from "../hooks/useDeleteLabOrder";
@@ -44,6 +47,7 @@ import {
   toStatusUpdatePayload,
 } from "../utils/laboratoryUtils";
 
+const RESULTS_PRINT_STATUSES = new Set(["sample_collected", "in_progress", "completed"]);
 const LabOrderDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -212,7 +216,19 @@ const LabOrderDetailsPage = () => {
         </Card>
       )}
 
+      <LabResultsForm
+        labOrder={labOrder}
+        canUpdate={canUpdate}
+        onSaved={() => showSuccess("Lab results saved.")}
+      />
+
       <LabRequisitionPrint labOrderId={labOrder.id} />
+
+      {RESULTS_PRINT_STATUSES.has(labOrder.status) && <LabResultsPrint labOrderId={labOrder.id} />}
+
+      {RESULTS_PRINT_STATUSES.has(labOrder.status) && canUpdate && (
+        <LabResultsEmail labOrderId={labOrder.id} />
+      )}
 
       <LabOrderDeleteDialog
         labOrder={pendingDelete ? labOrder : null}

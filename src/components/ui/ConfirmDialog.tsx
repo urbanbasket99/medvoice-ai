@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -8,6 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -33,12 +35,31 @@ const ConfirmDialog = ({
   onClose,
 }: ConfirmDialogProps) => (
   <Dialog open={open} onClose={isPending ? undefined : onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>{title}</DialogTitle>
-    <DialogContent>
-      <DialogContentText component="div">{message}</DialogContentText>
+    <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
+      <Box
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "error.light",
+          color: "error.dark",
+          flexShrink: 0,
+        }}
+      >
+        <WarningAmberRoundedIcon fontSize="small" />
+      </Box>
+      {title}
+    </DialogTitle>
+    <DialogContent sx={{ pt: 0 }}>
+      <DialogContentText component="div" sx={{ color: "text.secondary" }}>
+        {message}
+      </DialogContentText>
     </DialogContent>
-    <DialogActions sx={{ px: 3, pb: 2 }}>
-      <Button onClick={onClose} disabled={isPending}>
+    <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+      <Button onClick={onClose} disabled={isPending} variant="outlined">
         {cancelLabel}
       </Button>
       <Button

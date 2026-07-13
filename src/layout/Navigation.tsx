@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Collapse,
@@ -29,6 +29,27 @@ export interface NavigationProps {
   depth?: number;
 }
 
+function findAncestorIds(
+  items: NavItem[],
+  targetId: string,
+  trail: string[] = []
+): string[] | null {
+  for (const item of items) {
+    if (item.id === targetId) return trail;
+    if (item.children?.length) {
+      const found = findAncestorIds(item.children, targetId, [...trail, item.id]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function hasActiveDescendant(item: NavItem, activeId?: string): boolean {
+  if (!activeId) return false;
+  if (item.id === activeId) return true;
+  return item.children?.some((child) => hasActiveDescendant(child, activeId)) ?? false;
+}
+
 /**
  * Renders a (optionally nested) list of navigation items. Purely
  * presentational — routing/state decisions belong to the consumer via
@@ -43,6 +64,20 @@ const Navigation = ({
 }: NavigationProps) => {
   const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
 
+  const ancestorIds = useMemo(
+    () => (activeId ? findAncestorIds(items, activeId) ?? [] : []),
+    [items, activeId]
+  );
+
+  useEffect(() => {
+    if (!ancestorIds.length) return;
+    setOpenIds((prev) => {
+      const next = { ...prev };
+      for (const id of ancestorIds) next[id] = true;
+      return next;
+    });
+  }, [ancestorIds]);
+
   const toggleOpen = (id: string) =>
     setOpenIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -51,6 +86,7 @@ const Navigation = ({
       {items.map((item) => {
         const hasChildren = Boolean(item.children?.length);
         const isActive = item.id === activeId;
+        const childActive = hasActiveDescendant(item, activeId) && !isActive;
         const isOpen = openIds[item.id] ?? false;
 
         const buttonNode = (
@@ -59,7 +95,7 @@ const Navigation = ({
             {...(item.href ? ({ component: "a", href: item.href } as const) : {})}
             onClick={() => {
               if (hasChildren) toggleOpen(item.id);
-              item.onClick?.();
+              else item.onClick?.();
               onItemClick?.(item);
             }}
             sx={{
@@ -68,6 +104,9 @@ const Navigation = ({
               borderRadius: 1,
               mx: 1,
               mb: 0.5,
+              ...(childActive && {
+                bgcolor: "action.hover",
+              }),
             }}
           >
             {item.icon && (

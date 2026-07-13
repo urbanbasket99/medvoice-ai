@@ -6,6 +6,7 @@ import {
   DialogTitle,
   Divider,
   InputAdornment,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -102,12 +103,30 @@ const SearchDialog = ({ open, onClose }: SearchDialogProps) => {
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ pb: 1 }}>
-        <Typography variant="h6" fontWeight={700}>
-          Global Search
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Search patients, doctors, appointments, billing, and more
-        </Typography>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+            }}
+          >
+            <SearchRoundedIcon fontSize="small" />
+          </Box>
+          <Box>
+            <Typography variant="h6" fontWeight={700}>
+              Global Search
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Search patients, doctors, appointments, billing, and more
+            </Typography>
+          </Box>
+        </Stack>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 0 }}>

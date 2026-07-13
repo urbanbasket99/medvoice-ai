@@ -26,6 +26,7 @@ import { extractApiErrorMessage } from "../../../lib/extractApiErrorMessage";
 import { useAuth } from "../../auth";
 import BillingSnackbar from "../components/BillingSnackbar";
 import BillSummary from "../components/BillSummary";
+import InvoiceClaimsSection from "../components/InvoiceClaimsSection";
 import InvoiceDeleteDialog from "../components/InvoiceDeleteDialog";
 import InvoiceDetailsSkeleton from "../components/InvoiceDetailsSkeleton";
 import InvoicePrint from "../components/InvoicePrint";
@@ -185,6 +186,13 @@ const InvoiceDetailsPage = () => {
             <Stack spacing={0.5}>
               <Typography variant="body2"><strong>Status:</strong> {INVOICE_STATUS_LABELS[invoice.status]}</Typography>
               <Typography variant="body2"><strong>Invoice Date:</strong> {formatDisplayDate(invoice.invoiceDate)}</Typography>
+              <Typography variant="body2">
+                <strong>Provisional:</strong> {invoice.isProvisional ? "Yes" : "No"}
+              </Typography>
+              <Typography variant="body2">
+                <strong>TPA:</strong>{" "}
+                {invoice.isTpa ? invoice.tpaName ?? invoice.tpaId ?? "Yes" : "No"}
+              </Typography>
               {invoice.notes && (
                 <Typography variant="body2"><strong>Notes:</strong> {invoice.notes}</Typography>
               )}
@@ -264,6 +272,12 @@ const InvoiceDetailsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      <InvoiceClaimsSection
+        invoiceId={invoice.id}
+        canUpdate={canUpdate}
+        defaultTpaId={invoice.tpaId}
+      />
 
       <InvoicePrint invoice={invoice} />
 

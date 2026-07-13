@@ -13,6 +13,7 @@ export const laboratoryQueryKeys = {
   details: () => [...laboratoryQueryKeys.orders(), "detail"] as const,
   detail: (id: string) => [...laboratoryQueryKeys.details(), id] as const,
   print: (id: string) => [...laboratoryQueryKeys.orders(), "print", id] as const,
+  resultsPrint: (id: string) => [...laboratoryQueryKeys.orders(), "results-print", id] as const,
   labTests: () => [...laboratoryQueryKeys.all, "lab-tests"] as const,
   labTestSearch: (query: string) => [...laboratoryQueryKeys.labTests(), "search", query] as const,
   labTestList: (params: LabTestListParams) => [...laboratoryQueryKeys.labTests(), "list", params] as const,
@@ -44,6 +45,13 @@ export const labOrderPrintQueryOptions = (id: string | undefined) =>
   queryOptions({
     queryKey: laboratoryQueryKeys.print(id ?? "unknown"),
     queryFn: () => laboratoryApi.getPrintData(id as string),
+    enabled: Boolean(id),
+  });
+
+export const labResultsPrintQueryOptions = (id: string | undefined) =>
+  queryOptions({
+    queryKey: laboratoryQueryKeys.resultsPrint(id ?? "unknown"),
+    queryFn: () => laboratoryApi.getResultsPrintData(id as string),
     enabled: Boolean(id),
   });
 

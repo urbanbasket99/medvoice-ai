@@ -217,10 +217,20 @@ export const getComponents = (): Components<Theme> => ({
   },
 
   MuiCard: {
+    defaultProps: {
+      elevation: 0,
+    },
     styleOverrides: {
       root: ({ theme }) => ({
         borderRadius: RADIUS.lg,
+        border: `1px solid ${theme.palette.divider}`,
         boxShadow: theme.customShadows.card,
+        transition: theme.transitions.create(["box-shadow", "border-color"], {
+          duration: theme.transitions.duration.shorter,
+        }),
+        "&:hover": {
+          boxShadow: theme.customShadows.cardHover,
+        },
       }),
     },
   },
@@ -237,7 +247,15 @@ export const getComponents = (): Components<Theme> => ({
   MuiCardHeader: {
     styleOverrides: {
       root: {
-        padding: "24px 24px 0",
+        padding: "20px 24px 0",
+      },
+      title: {
+        fontWeight: 700,
+        fontSize: "1rem",
+        letterSpacing: "-0.01em",
+      },
+      subheader: {
+        fontSize: "0.8125rem",
       },
     },
   },

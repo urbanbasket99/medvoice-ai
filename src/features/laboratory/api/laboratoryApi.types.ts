@@ -7,6 +7,14 @@ export interface LabOrderItemApiResponse {
   sample_type: string;
   instructions: string | null;
   sort_order: number;
+  result_value?: string | null;
+  result_unit?: string | null;
+  reference_range?: string | null;
+  result_flag?: string | null;
+  result_notes?: string | null;
+  resulted_at?: string | null;
+  resulted_by?: string | null;
+  sample_barcode?: string | null;
 }
 
 export interface LabOrderStatusEventApiResponse {
@@ -37,6 +45,7 @@ export interface LabOrderApiResponse {
   doctor_code: string | null;
   doctor_specialization: string | null;
   consultation_visit_number: string | null;
+  is_partial_report?: boolean;
   items: LabOrderItemApiResponse[];
   status_history: LabOrderStatusEventApiResponse[];
 }
@@ -105,9 +114,66 @@ export interface LabOrderPrintItemApiResponse {
   category: string | null;
   sample_type: string;
   instructions: string | null;
+  result_value?: string | null;
+  result_unit?: string | null;
+  reference_range?: string | null;
+  result_flag?: string | null;
+  result_notes?: string | null;
 }
 
 export interface LabOrderPrintApiResponse {
+  lab_order_id: string;
+  order_number: string;
+  consultation_id: string;
+  priority: string;
+  status: string;
+  clinical_notes: string | null;
+  patient_name: string | null;
+  patient_mrn: string | null;
+  patient_uhid: string | null;
+  patient_gender: string | null;
+  patient_date_of_birth: string | null;
+  doctor_name: string | null;
+  doctor_code: string | null;
+  doctor_specialization: string | null;
+  consultation_visit_number: string | null;
+  items: LabOrderPrintItemApiResponse[];
+  created_at: string;
+}
+
+export interface LabResultItemRequestBody {
+  id: string;
+  result_value?: string | null;
+  result_unit?: string | null;
+  reference_range?: string | null;
+  result_flag?: string | null;
+  result_notes?: string | null;
+  sample_barcode?: string | null;
+}
+
+export interface LabResultsUpdateRequestBody {
+  items: LabResultItemRequestBody[];
+  is_partial_report?: boolean;
+}
+
+export interface LabResultsEmailRequestBody {
+  recipient_email: string;
+  recipient_role?: string | null;
+}
+
+export interface ReportEmailDeliveryApiResponse {
+  id: string;
+  resource_type: string;
+  resource_id: string;
+  recipient_email: string;
+  recipient_role: string | null;
+  subject: string;
+  status: string;
+  sent_at: string | null;
+  created_at: string;
+}
+
+export interface LabResultsPrintApiResponse {
   lab_order_id: string;
   order_number: string;
   consultation_id: string;

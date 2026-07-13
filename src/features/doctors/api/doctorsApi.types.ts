@@ -58,3 +58,27 @@ export interface DoctorRequestBody {
   joining_date: string | null;
   status?: DoctorStatus;
 }
+
+export interface DoctorAvailabilitySlotApiResponse {
+  id?: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  slot_minutes: number;
+  is_active: boolean;
+}
+
+export interface DoctorAvailabilityApiResponse {
+  doctor_id: string;
+  slots: DoctorAvailabilitySlotApiResponse[];
+}
+
+export interface DoctorAvailabilityRequestBody {
+  slots: Array<{
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    slot_minutes: number;
+    is_active: boolean;
+  }>;
+}

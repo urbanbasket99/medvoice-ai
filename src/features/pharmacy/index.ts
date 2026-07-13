@@ -6,6 +6,9 @@ export { default as DispenseListPage } from "./pages/DispenseListPage";
 export { default as BatchManagementPage } from "./pages/BatchManagementPage";
 export { default as StockHistoryPage } from "./pages/StockHistoryPage";
 export { default as LowStockDashboardPage } from "./pages/LowStockDashboardPage";
+export { default as SupplierListPage } from "./pages/SupplierListPage";
+export { default as VendorPaymentsPage } from "./pages/VendorPaymentsPage";
+export { default as RetailDispensePage } from "./pages/RetailDispensePage";
 
 export { default as MedicineSearch } from "./components/MedicineSearch";
 export { default as BatchSelector } from "./components/BatchSelector";

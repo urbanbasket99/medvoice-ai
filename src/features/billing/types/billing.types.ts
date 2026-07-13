@@ -10,6 +10,8 @@ export type BillingDepartment =
 export type ReferenceType = "lab_order" | "radiology_order" | "dispense_record" | "prescription" | "manual";
 export type InvoiceSortField = "created_at" | "updated_at" | "invoice_number" | "grand_total" | "invoice_date";
 export type SortDirection = "asc" | "desc";
+export type ClaimStatus = "pending" | "submitted" | "approved" | "rejected";
+export type CollectionsGroupBy = "doctor" | "date" | "user";
 
 export interface InvoiceItem {
   id: string;
@@ -46,8 +48,10 @@ export interface InsuranceClaim {
   claimNumber: string | null;
   claimedAmount: string | null;
   approvedAmount: string | null;
-  status: string;
+  status: ClaimStatus;
   notes: string | null;
+  tpaId: string | null;
+  submittedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +71,10 @@ export interface Invoice {
   paidAmount: string;
   balance: string;
   notes: string | null;
+  isProvisional: boolean;
+  isTpa: boolean;
+  tpaId: string | null;
+  tpaName: string | null;
   createdAt: string;
   updatedAt: string;
   patientName: string | null;
@@ -122,6 +130,9 @@ export interface CreateInvoicePayload {
   notes?: string | null;
   discountAmount?: string;
   taxAmount?: string;
+  isProvisional?: boolean;
+  isTpa?: boolean;
+  tpaId?: string | null;
   items: InvoiceItemPayload[];
 }
 
@@ -130,6 +141,9 @@ export interface UpdateInvoicePayload {
   notes?: string | null;
   discountAmount?: string;
   taxAmount?: string;
+  isProvisional?: boolean;
+  isTpa?: boolean;
+  tpaId?: string | null;
   items: InvoiceItemPayload[];
 }
 
@@ -144,4 +158,83 @@ export interface CreatePaymentPayload {
 
 export interface ConsultationChargesResult {
   items: InvoiceItemPayload[];
+}
+
+export interface Tpa {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TpaListResult {
+  items: Tpa[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface TpaListParams {
+  page?: number;
+  pageSize?: number;
+  isActive?: boolean;
+}
+
+export interface CreateTpaPayload {
+  code: string;
+  name: string;
+  contactPerson?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  isActive?: boolean;
+}
+
+export interface UpdateTpaPayload extends CreateTpaPayload {}
+
+export interface CreateClaimPayload {
+  insurerName?: string | null;
+  claimNumber?: string | null;
+  claimedAmount?: string | null;
+  notes?: string | null;
+  tpaId?: string | null;
+}
+
+export interface UpdateClaimPayload {
+  insurerName?: string | null;
+  claimNumber?: string | null;
+  claimedAmount?: string | null;
+  approvedAmount?: string | null;
+  status?: ClaimStatus;
+  notes?: string | null;
+  tpaId?: string | null;
+  submittedAt?: string | null;
+}
+
+export interface CollectionsReportParams {
+  dateFrom: string;
+  dateTo: string;
+  groupBy: CollectionsGroupBy;
+}
+
+export interface CollectionsReportRow {
+  groupKey: string;
+  groupLabel: string;
+  invoiceCount: number;
+  totalCollected: string;
+  totalBilled: string;
+}
+
+export interface CollectionsReportResult {
+  dateFrom: string;
+  dateTo: string;
+  groupBy: CollectionsGroupBy;
+  rows: CollectionsReportRow[];
 }

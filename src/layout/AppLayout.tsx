@@ -5,6 +5,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import Breadcrumbs from "./Breadcrumbs";
+import PageContent from "../components/ui/PageContent";
 import type { NavItem } from "./Navigation";
 import type { BreadcrumbItem } from "./Breadcrumbs";
 
@@ -88,7 +89,9 @@ const AppLayout = ({
 
         {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} />}
 
-        <Box sx={{ flex: 1, overflowY: "auto", p: { xs: 2, sm: 3 } }}>{children}</Box>
+        <Box sx={{ flex: 1, overflowY: "auto", p: { xs: 2, sm: 3 } }}>
+          <PageContent>{children}</PageContent>
+        </Box>
 
         <Footer>{footer}</Footer>
       </Box>

@@ -124,6 +124,13 @@ export interface StockAdjustRequestBody {
   notes?: string | null;
 }
 
+export interface StockReturnRequestBody {
+  medicine_id: string;
+  batch_id?: string | null;
+  quantity: number;
+  notes?: string | null;
+}
+
 export interface StockMovementApiResponse {
   id: string;
   medicine_id: string;
@@ -173,9 +180,10 @@ export interface DispenseStatusEventApiResponse {
 export interface DispenseRecordApiResponse {
   id: string;
   prescription_id: string | null;
-  consultation_id: string;
+  consultation_id: string | null;
   patient_id: string;
-  doctor_id: string;
+  doctor_id: string | null;
+  dispense_type?: string;
   dispensed_by: string | null;
   status: string;
   notes: string | null;
@@ -216,7 +224,9 @@ export interface DispenseItemRequestBody {
 }
 
 export interface DispenseCreateRequestBody {
-  prescription_id: string;
+  prescription_id?: string | null;
+  patient_id?: string | null;
+  dispense_type?: string;
   notes?: string | null;
   items: DispenseItemRequestBody[];
 }
@@ -244,7 +254,7 @@ export interface DispensePrintApiResponse {
   dispense_id: string;
   order_number: string;
   prescription_id: string | null;
-  consultation_id: string;
+  consultation_id: string | null;
   status: string;
   notes: string | null;
   patient_name: string | null;
@@ -264,14 +274,63 @@ export interface DispensePrintApiResponse {
 export interface PharmacySupplierApiResponse {
   id: string;
   name: string;
+  code?: string | null;
   contact_person: string | null;
   phone: string | null;
   email: string | null;
   address: string | null;
   is_active: boolean;
   created_at: string;
+  updated_at?: string | null;
 }
 
 export interface PharmacySupplierListApiResponse {
   items: PharmacySupplierApiResponse[];
+}
+
+export interface PharmacySupplierCreateRequestBody {
+  name: string;
+  code?: string | null;
+  contact_person?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  is_active?: boolean;
+}
+
+export interface PharmacySupplierUpdateRequestBody {
+  name?: string;
+  code?: string | null;
+  contact_person?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  is_active?: boolean;
+}
+
+export interface VendorPaymentApiResponse {
+  id: string;
+  payment_number: string;
+  supplier_id: string;
+  supplier_name?: string | null;
+  amount: string | number;
+  payment_date: string;
+  payment_method: string;
+  reference_number: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface VendorPaymentListApiResponse {
+  items: VendorPaymentApiResponse[];
+}
+
+export interface VendorPaymentCreateRequestBody {
+  supplier_id: string;
+  amount: string | number;
+  payment_date: string;
+  payment_method: string;
+  reference_number?: string | null;
+  notes?: string | null;
 }

@@ -35,6 +35,8 @@ export interface InsuranceClaimApiResponse {
   claimed_amount: string | number | null;
   approved_amount: string | number | null;
   notes: string | null;
+  tpa_id?: string | null;
+  submitted_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -54,6 +56,10 @@ export interface InvoiceApiResponse {
   paid_amount: string | number;
   balance: string | number;
   notes: string | null;
+  is_provisional?: boolean;
+  is_tpa?: boolean;
+  tpa_id?: string | null;
+  tpa_name?: string | null;
   created_at: string;
   updated_at: string;
   patient_name: string | null;
@@ -98,6 +104,9 @@ export interface InvoiceCreateRequestBody {
   items: InvoiceItemRequestBody[];
   discount_amount?: string;
   tax_amount?: string;
+  is_provisional?: boolean;
+  is_tpa?: boolean;
+  tpa_id?: string | null;
 }
 
 export interface InvoiceUpdateRequestBody {
@@ -106,6 +115,9 @@ export interface InvoiceUpdateRequestBody {
   items: InvoiceItemRequestBody[];
   discount_amount?: string;
   tax_amount?: string;
+  is_provisional?: boolean;
+  is_tpa?: boolean;
+  tpa_id?: string | null;
 }
 
 export interface PaymentCreateRequestBody {
@@ -128,4 +140,73 @@ export interface InvoiceItemSuggestionApiResponse {
 
 export interface ConsultationChargesApiResponse {
   items: InvoiceItemSuggestionApiResponse[];
+}
+
+export interface TpaApiResponse {
+  id: string;
+  code: string;
+  name: string;
+  contact_person: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TpaListApiResponse {
+  items: TpaApiResponse[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface TpaRequestBody {
+  code: string;
+  name: string;
+  contact_person?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  is_active?: boolean;
+}
+
+export interface ClaimCreateRequestBody {
+  insurer_name?: string | null;
+  claim_number?: string | null;
+  claimed_amount?: string | null;
+  notes?: string | null;
+  tpa_id?: string | null;
+}
+
+export interface ClaimUpdateRequestBody {
+  insurer_name?: string | null;
+  claim_number?: string | null;
+  claimed_amount?: string | null;
+  approved_amount?: string | null;
+  status?: string;
+  notes?: string | null;
+  tpa_id?: string | null;
+  submitted_at?: string | null;
+}
+
+export interface ClaimListApiResponse {
+  items: InsuranceClaimApiResponse[];
+}
+
+export interface CollectionsReportRowApiResponse {
+  group_key: string;
+  group_label: string;
+  invoice_count: number;
+  total_collected: string | number;
+  total_billed: string | number;
+}
+
+export interface CollectionsReportApiResponse {
+  date_from: string;
+  date_to: string;
+  group_by: string;
+  rows: CollectionsReportRowApiResponse[];
 }

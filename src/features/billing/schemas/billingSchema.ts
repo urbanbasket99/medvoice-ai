@@ -60,7 +60,18 @@ export const invoiceFormSchema = z.object({
   notes: optionalText(2000),
   discountAmount: nonNegativeDecimal.optional().default("0"),
   taxAmount: nonNegativeDecimal.optional().default("0"),
+  isProvisional: z.boolean().default(false),
+  isTpa: z.boolean().default(false),
+  tpaId: z.string().optional().nullable(),
   items: z.array(invoiceItemSchema).min(1, "Add at least one line item"),
+}).superRefine((values, ctx) => {
+  if (values.isTpa && !values.tpaId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Select a TPA when TPA billing is enabled",
+      path: ["tpaId"],
+    });
+  }
 });
 
 export const paymentFormSchema = z.object({
@@ -71,6 +82,28 @@ export const paymentFormSchema = z.object({
   notes: optionalText(500),
 });
 
+export const CLAIM_STATUS_OPTIONS = ["pending", "submitted", "approved", "rejected"] as const;
+
+export const claimFormSchema = z.object({
+  insurerName: optionalText(150),
+  claimNumber: optionalText(100),
+  claimedAmount: nonNegativeDecimal.optional().or(z.literal("")),
+  notes: optionalText(500),
+  tpaId: z.string().optional().nullable(),
+});
+
+export const tpaFormSchema = z.object({
+  code: z.string().trim().min(1, "Code is required").max(30),
+  name: z.string().trim().min(1, "Name is required").max(200),
+  contactPerson: optionalText(150),
+  phone: optionalText(20),
+  email: optionalText(255),
+  address: optionalText(1000),
+  isActive: z.boolean().default(true),
+});
+
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
 export type InvoiceItemFormValues = z.infer<typeof invoiceItemSchema>;
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>;
+export type ClaimFormValues = z.infer<typeof claimFormSchema>;
+export type TpaFormValues = z.infer<typeof tpaFormSchema>;

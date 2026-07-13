@@ -111,6 +111,9 @@ export const toCreatePayload = (values: InvoiceFormValues): CreateInvoicePayload
   notes: emptyToNull(values.notes),
   discountAmount: values.discountAmount ?? "0",
   taxAmount: values.taxAmount ?? "0",
+  isProvisional: values.isProvisional,
+  isTpa: values.isTpa,
+  tpaId: values.isTpa ? values.tpaId ?? null : null,
   items: values.items.map(toItemPayload),
 });
 
@@ -119,6 +122,9 @@ export const toUpdatePayload = (values: InvoiceFormValues): UpdateInvoicePayload
   notes: emptyToNull(values.notes),
   discountAmount: values.discountAmount ?? "0",
   taxAmount: values.taxAmount ?? "0",
+  isProvisional: values.isProvisional,
+  isTpa: values.isTpa,
+  tpaId: values.isTpa ? values.tpaId ?? null : null,
   items: values.items.map(toItemPayload),
 });
 
@@ -137,6 +143,9 @@ export const toFormValues = (invoice: Invoice): InvoiceFormValues => ({
   notes: invoice.notes ?? "",
   discountAmount: invoice.discountAmount,
   taxAmount: invoice.taxAmount,
+  isProvisional: invoice.isProvisional,
+  isTpa: invoice.isTpa,
+  tpaId: invoice.tpaId,
   items:
     invoice.items.length > 0
       ? invoice.items
@@ -176,6 +185,9 @@ export const invoiceFormDefaultValues = (consultationId = ""): InvoiceFormValues
   notes: "",
   discountAmount: "0",
   taxAmount: "0",
+  isProvisional: false,
+  isTpa: false,
+  tpaId: null,
   items: [],
 });
 

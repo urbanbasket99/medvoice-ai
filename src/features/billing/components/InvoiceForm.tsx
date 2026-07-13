@@ -1,7 +1,23 @@
-import { Alert, Box, Button, Card, CardContent, CardHeader, CircularProgress, Divider, Stack, TextField } from "@mui/material";
-import { FormProvider, useForm } from "react-hook-form";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  MenuItem,
+  Stack,
+  TextField,
+} from "@mui/material";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 
+import { tpasListQueryOptions } from "../api/billingQueries";
 import { invoiceFormSchema, type InvoiceFormValues } from "../schemas/billingSchema";
 import InvoiceItemEditor from "./InvoiceItemEditor";
 import BillSummary from "./BillSummary";
@@ -31,11 +47,15 @@ const InvoiceForm = ({
     resolver: zodResolver(invoiceFormSchema),
   });
 
-  const { register, handleSubmit, formState: { errors }, watch } = methods;
+  const { register, handleSubmit, formState: { errors }, watch, control, setValue } = methods;
   const items = watch("items");
   const invoiceDiscount = watch("discountAmount");
   const invoiceTax = watch("taxAmount");
+  const isTpa = watch("isTpa");
   const totals = computeTotalsFromItems(items ?? [], invoiceDiscount, invoiceTax);
+
+  const tpasQuery = useQuery(tpasListQueryOptions({ page: 1, pageSize: 100, isActive: true }));
+  const tpas = tpasQuery.data?.items ?? [];
 
   return (
     <FormProvider {...methods}>
@@ -85,6 +105,69 @@ const InvoiceForm = ({
                   {...register("taxAmount")}
                 />
               </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ alignItems: { sm: "center" } }}>
+                <Controller
+                  name="isProvisional"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={(event) => field.onChange(event.target.checked)}
+                          disabled={readOnly}
+                        />
+                      }
+                      label="Provisional invoice"
+                    />
+                  )}
+                />
+                <Controller
+                  name="isTpa"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={(event) => {
+                            field.onChange(event.target.checked);
+                            if (!event.target.checked) setValue("tpaId", null);
+                          }}
+                          disabled={readOnly}
+                        />
+                      }
+                      label="TPA / Insurance"
+                    />
+                  )}
+                />
+              </Stack>
+              {isTpa && (
+                <Controller
+                  name="tpaId"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      select
+                      label="TPA"
+                      size="small"
+                      fullWidth
+                      disabled={readOnly}
+                      value={field.value ?? ""}
+                      onChange={(event) => field.onChange(event.target.value || null)}
+                      error={Boolean(errors.tpaId)}
+                      helperText={errors.tpaId?.message}
+                    >
+                      <MenuItem value="">Select TPA</MenuItem>
+                      {tpas.map((tpa) => (
+                        <MenuItem key={tpa.id} value={tpa.id}>
+                          {tpa.code} — {tpa.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              )}
               <TextField
                 label="Notes"
                 size="small"

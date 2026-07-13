@@ -114,6 +114,16 @@ export const patientsApi = {
     return toPatient(data);
   },
 
+  async lookup(params: { uhid?: string; mrn?: string }): Promise<Patient> {
+    const { data } = await httpClient.get<PatientApiResponse>("/patients/lookup", {
+      params: {
+        uhid: params.uhid || undefined,
+        mrn: params.mrn || undefined,
+      },
+    });
+    return toPatient(data);
+  },
+
   async create(payload: CreatePatientPayload): Promise<Patient> {
     const { data } = await httpClient.post<PatientApiResponse>("/patients", toRequestBody(payload));
     return toPatient(data);

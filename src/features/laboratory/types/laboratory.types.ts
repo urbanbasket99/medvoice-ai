@@ -1,6 +1,7 @@
 export type LabPriority = "routine" | "urgent" | "stat";
 export type LabStatus = "ordered" | "sample_collected" | "in_progress" | "completed" | "cancelled";
 export type SampleType = "blood" | "urine" | "stool" | "swab" | "sputum" | "csf" | "tissue" | "other";
+export type LabResultFlag = "normal" | "low" | "high" | "critical" | "abnormal";
 export type LabOrderSortField = "created_at" | "updated_at" | "order_number";
 export type SortDirection = "asc" | "desc";
 
@@ -13,6 +14,14 @@ export interface LabOrderItem {
   sampleType: SampleType;
   instructions: string | null;
   sortOrder: number;
+  resultValue: string | null;
+  resultUnit: string | null;
+  referenceRange: string | null;
+  resultFlag: LabResultFlag | null;
+  resultNotes: string | null;
+  resultedAt: string | null;
+  resultedBy: string | null;
+  sampleBarcode: string | null;
 }
 
 export interface LabOrderStatusEvent {
@@ -43,6 +52,7 @@ export interface LabOrder {
   doctorCode: string | null;
   doctorSpecialization: string | null;
   consultationVisitNumber: string | null;
+  isPartialReport: boolean;
   items: LabOrderItem[];
   statusHistory: LabOrderStatusEvent[];
 }
@@ -99,6 +109,38 @@ export interface UpdateLabOrderStatusPayload {
   notes?: string | null;
 }
 
+export interface LabResultItemPayload {
+  id: string;
+  resultValue?: string | null;
+  resultUnit?: string | null;
+  referenceRange?: string | null;
+  resultFlag?: LabResultFlag | null;
+  resultNotes?: string | null;
+  sampleBarcode?: string | null;
+}
+
+export interface UpdateLabResultsPayload {
+  items: LabResultItemPayload[];
+  isPartialReport?: boolean;
+}
+
+export interface SendLabResultsEmailPayload {
+  recipientEmail: string;
+  recipientRole?: string | null;
+}
+
+export interface ReportEmailDelivery {
+  id: string;
+  resourceType: string;
+  resourceId: string;
+  recipientEmail: string;
+  recipientRole: string | null;
+  subject: string;
+  status: string;
+  sentAt: string | null;
+  createdAt: string;
+}
+
 export interface LabTestMaster {
   id: string;
   testCode: string;
@@ -133,6 +175,11 @@ export interface LabOrderPrintItem {
   category: string | null;
   sampleType: string;
   instructions: string | null;
+  resultValue?: string | null;
+  resultUnit?: string | null;
+  referenceRange?: string | null;
+  resultFlag?: string | null;
+  resultNotes?: string | null;
 }
 
 export interface LabOrderPrintData {
@@ -154,3 +201,5 @@ export interface LabOrderPrintData {
   items: LabOrderPrintItem[];
   createdAt: string;
 }
+
+export type LabResultsPrintData = LabOrderPrintData;

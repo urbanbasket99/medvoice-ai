@@ -42,7 +42,14 @@ const KpiCard = ({ metric }: KpiCardProps) => {
         : theme.palette.text.secondary;
 
   return (
-    <Card sx={{ height: "100%" }}>
+    <Card
+      sx={{
+        height: "100%",
+        "&:hover": {
+          borderColor: "primary.light",
+        },
+      }}
+    >
       <CardContent>
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
           <Typography variant="body2" color="text.secondary">
@@ -61,7 +68,7 @@ const KpiCard = ({ metric }: KpiCardProps) => {
           </Avatar>
         </Stack>
 
-        <Typography variant="h4" component="p" fontWeight={700} sx={{ mt: 1.5 }}>
+        <Typography variant="h5" component="p" fontWeight={700} sx={{ mt: 1.5 }}>
           {metric.value}
         </Typography>
 

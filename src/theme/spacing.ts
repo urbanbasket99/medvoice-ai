@@ -22,10 +22,10 @@ export interface LayoutTokens {
  * component overrides (AppBar height, Drawer width, Dialog widths, etc.).
  */
 export const layout: LayoutTokens = {
-  headerHeight: 64,
+  headerHeight: 60,
   breadcrumbHeight: 40,
-  sidebarExpanded: 260,
-  sidebarCollapsed: 72,
+  sidebarExpanded: 272,
+  sidebarCollapsed: 68,
   contentMaxWidth: 1440,
   formMaxWidth: 720,
   formWideMaxWidth: 960,

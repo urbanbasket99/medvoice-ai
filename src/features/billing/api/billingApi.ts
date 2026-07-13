@@ -1,6 +1,11 @@
 import { httpClient } from "../../auth/api/httpClient";
 import type {
+  ClaimCreateRequestBody,
+  ClaimListApiResponse,
+  ClaimUpdateRequestBody,
+  CollectionsReportApiResponse,
   ConsultationChargesApiResponse,
+  InsuranceClaimApiResponse,
   InvoiceApiResponse,
   InvoiceCreateRequestBody,
   InvoiceItemApiResponse,
@@ -10,13 +15,21 @@ import type {
   PaymentApiResponse,
   PaymentCreateRequestBody,
   PaymentListApiResponse,
-  InsuranceClaimApiResponse,
+  TpaApiResponse,
+  TpaListApiResponse,
+  TpaRequestBody,
 } from "./billingApi.types";
 import type {
   BillingDepartment,
+  ClaimStatus,
+  CollectionsGroupBy,
+  CollectionsReportParams,
+  CollectionsReportResult,
   ConsultationChargesResult,
+  CreateClaimPayload,
   CreateInvoicePayload,
   CreatePaymentPayload,
+  CreateTpaPayload,
   InsuranceClaim,
   Invoice,
   InvoiceItem,
@@ -27,7 +40,12 @@ import type {
   Payment,
   PaymentMethod,
   ReferenceType,
+  Tpa,
+  TpaListParams,
+  TpaListResult,
+  UpdateClaimPayload,
   UpdateInvoicePayload,
+  UpdateTpaPayload,
 } from "../types/billing.types";
 
 const toPriceString = (value: string | number | null | undefined): string => {
@@ -70,8 +88,10 @@ const toInsuranceClaim = (response: InsuranceClaimApiResponse): InsuranceClaim =
   claimNumber: response.claim_number,
   claimedAmount: response.claimed_amount != null ? toPriceString(response.claimed_amount) : null,
   approvedAmount: response.approved_amount != null ? toPriceString(response.approved_amount) : null,
-  status: response.status,
+  status: response.status as ClaimStatus,
   notes: response.notes,
+  tpaId: response.tpa_id ?? null,
+  submittedAt: response.submitted_at ?? null,
   createdAt: response.created_at,
   updatedAt: response.updated_at,
 });
@@ -91,6 +111,10 @@ const toInvoice = (response: InvoiceApiResponse): Invoice => ({
   paidAmount: toPriceString(response.paid_amount),
   balance: toPriceString(response.balance),
   notes: response.notes,
+  isProvisional: Boolean(response.is_provisional),
+  isTpa: Boolean(response.is_tpa),
+  tpaId: response.tpa_id ?? null,
+  tpaName: response.tpa_name ?? null,
   createdAt: response.created_at,
   updatedAt: response.updated_at,
   patientName: response.patient_name,
@@ -112,6 +136,19 @@ const toListResult = (response: InvoiceListApiResponse): InvoiceListResult => ({
   totalPages: response.total_pages,
 });
 
+const toTpa = (response: TpaApiResponse): Tpa => ({
+  id: response.id,
+  code: response.code,
+  name: response.name,
+  contactPerson: response.contact_person,
+  phone: response.phone,
+  email: response.email,
+  address: response.address,
+  isActive: response.is_active,
+  createdAt: response.created_at,
+  updatedAt: response.updated_at,
+});
+
 const emptyToNull = (value: string | null | undefined): string | null => {
   if (value == null) return null;
   const trimmed = value.trim();
@@ -128,6 +165,16 @@ const toItemBody = (item: CreateInvoicePayload["items"][number]): InvoiceItemReq
   sort_order: item.sortOrder,
   reference_type: item.referenceType ?? null,
   reference_id: item.referenceId ?? null,
+});
+
+const toTpaBody = (payload: CreateTpaPayload | UpdateTpaPayload): TpaRequestBody => ({
+  code: payload.code,
+  name: payload.name,
+  contact_person: emptyToNull(payload.contactPerson ?? undefined),
+  phone: emptyToNull(payload.phone ?? undefined),
+  email: emptyToNull(payload.email ?? undefined),
+  address: emptyToNull(payload.address ?? undefined),
+  is_active: payload.isActive ?? true,
 });
 
 export const billingApi = {
@@ -172,6 +219,9 @@ export const billingApi = {
       notes: emptyToNull(payload.notes ?? undefined),
       discount_amount: payload.discountAmount ?? "0",
       tax_amount: payload.taxAmount ?? "0",
+      is_provisional: payload.isProvisional ?? false,
+      is_tpa: payload.isTpa ?? false,
+      tpa_id: payload.isTpa ? payload.tpaId ?? null : null,
       items: payload.items.map(toItemBody),
     };
     const { data } = await httpClient.post<InvoiceApiResponse>("/billing/invoices", body);
@@ -184,6 +234,9 @@ export const billingApi = {
       notes: emptyToNull(payload.notes ?? undefined),
       discount_amount: payload.discountAmount ?? "0",
       tax_amount: payload.taxAmount ?? "0",
+      is_provisional: payload.isProvisional ?? false,
+      is_tpa: payload.isTpa ?? false,
+      tpa_id: payload.isTpa ? payload.tpaId ?? null : null,
       items: payload.items.map(toItemBody),
     };
     const { data } = await httpClient.put<InvoiceApiResponse>(`/billing/invoices/${id}`, body);
@@ -234,6 +287,99 @@ export const billingApi = {
         sortOrder: index,
         referenceType: (item.reference_type as ReferenceType | null) ?? null,
         referenceId: item.reference_id,
+      })),
+    };
+  },
+
+  async listTpas(params: TpaListParams = {}): Promise<TpaListResult> {
+    const { data } = await httpClient.get<TpaListApiResponse>("/billing/tpas", {
+      params: {
+        page: params.page,
+        page_size: params.pageSize,
+        is_active: params.isActive,
+      },
+    });
+    return {
+      items: data.items.map(toTpa),
+      total: data.total,
+      page: data.page,
+      pageSize: data.page_size,
+      totalPages: data.total_pages,
+    };
+  },
+
+  async getTpa(id: string): Promise<Tpa> {
+    const { data } = await httpClient.get<TpaApiResponse>(`/billing/tpas/${id}`);
+    return toTpa(data);
+  },
+
+  async createTpa(payload: CreateTpaPayload): Promise<Tpa> {
+    const { data } = await httpClient.post<TpaApiResponse>("/billing/tpas", toTpaBody(payload));
+    return toTpa(data);
+  },
+
+  async updateTpa(id: string, payload: UpdateTpaPayload): Promise<Tpa> {
+    const { data } = await httpClient.put<TpaApiResponse>(`/billing/tpas/${id}`, toTpaBody(payload));
+    return toTpa(data);
+  },
+
+  async removeTpa(id: string): Promise<void> {
+    await httpClient.delete(`/billing/tpas/${id}`);
+  },
+
+  async listClaims(invoiceId: string): Promise<InsuranceClaim[]> {
+    const { data } = await httpClient.get<ClaimListApiResponse>(`/billing/invoices/${invoiceId}/claims`);
+    return data.items.map(toInsuranceClaim);
+  },
+
+  async createClaim(invoiceId: string, payload: CreateClaimPayload): Promise<InsuranceClaim> {
+    const body: ClaimCreateRequestBody = {
+      insurer_name: emptyToNull(payload.insurerName ?? undefined),
+      claim_number: emptyToNull(payload.claimNumber ?? undefined),
+      claimed_amount: emptyToNull(payload.claimedAmount ?? undefined),
+      notes: emptyToNull(payload.notes ?? undefined),
+      tpa_id: payload.tpaId ?? null,
+    };
+    const { data } = await httpClient.post<InsuranceClaimApiResponse>(
+      `/billing/invoices/${invoiceId}/claims`,
+      body
+    );
+    return toInsuranceClaim(data);
+  },
+
+  async updateClaim(claimId: string, payload: UpdateClaimPayload): Promise<InsuranceClaim> {
+    const body: ClaimUpdateRequestBody = {
+      insurer_name: payload.insurerName !== undefined ? emptyToNull(payload.insurerName) : undefined,
+      claim_number: payload.claimNumber !== undefined ? emptyToNull(payload.claimNumber) : undefined,
+      claimed_amount: payload.claimedAmount !== undefined ? emptyToNull(payload.claimedAmount) : undefined,
+      approved_amount: payload.approvedAmount !== undefined ? emptyToNull(payload.approvedAmount) : undefined,
+      status: payload.status,
+      notes: payload.notes !== undefined ? emptyToNull(payload.notes) : undefined,
+      tpa_id: payload.tpaId,
+      submitted_at: payload.submittedAt,
+    };
+    const { data } = await httpClient.patch<InsuranceClaimApiResponse>(`/billing/claims/${claimId}`, body);
+    return toInsuranceClaim(data);
+  },
+
+  async getCollectionsReport(params: CollectionsReportParams): Promise<CollectionsReportResult> {
+    const { data } = await httpClient.get<CollectionsReportApiResponse>("/billing/reports/collections", {
+      params: {
+        date_from: params.dateFrom,
+        date_to: params.dateTo,
+        group_by: params.groupBy,
+      },
+    });
+    return {
+      dateFrom: data.date_from,
+      dateTo: data.date_to,
+      groupBy: data.group_by as CollectionsGroupBy,
+      rows: data.rows.map((row) => ({
+        groupKey: row.group_key,
+        groupLabel: row.group_label,
+        invoiceCount: row.invoice_count,
+        totalCollected: toPriceString(row.total_collected),
+        totalBilled: toPriceString(row.total_billed),
       })),
     };
   },

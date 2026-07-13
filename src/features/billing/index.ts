@@ -3,11 +3,14 @@ export { default as InvoiceCreatePage } from "./pages/InvoiceCreatePage";
 export { default as InvoiceDetailsPage } from "./pages/InvoiceDetailsPage";
 export { default as PaymentPage } from "./pages/PaymentPage";
 export { default as OutstandingBillsPage } from "./pages/OutstandingBillsPage";
+export { default as TpaListPage } from "./pages/TpaListPage";
+export { default as BillingReportsPage } from "./pages/BillingReportsPage";
 
 export { default as ConsultationBillingPanel } from "./components/ConsultationBillingPanel";
 
 export { default as BillSummary } from "./components/BillSummary";
 export { default as BillingSnackbar } from "./components/BillingSnackbar";
+export { default as InvoiceClaimsSection } from "./components/InvoiceClaimsSection";
 export { default as InvoiceDeleteDialog } from "./components/InvoiceDeleteDialog";
 export { default as InvoiceDetailsSkeleton } from "./components/InvoiceDetailsSkeleton";
 export { default as InvoiceForm } from "./components/InvoiceForm";
@@ -37,7 +40,16 @@ export type {
   BillingDepartment,
   Payment,
   InsuranceClaim,
+  ClaimStatus,
+  Tpa,
   CreateInvoicePayload,
   UpdateInvoicePayload,
   CreatePaymentPayload,
+  CreateTpaPayload,
+  UpdateTpaPayload,
+  CreateClaimPayload,
+  UpdateClaimPayload,
+  CollectionsReportParams,
+  CollectionsReportResult,
+  CollectionsGroupBy,
 } from "./types/billing.types";

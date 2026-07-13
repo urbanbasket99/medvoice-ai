@@ -1,0 +1,34 @@
+# Dependencies & build output
+node_modules
+dist
+dist-ssr
+
+# Local env (use .env from template for Docker)
+.env
+.env.local
+.env.*.local
+
+# Git & editor
+.git
+.gitignore
+.vscode
+.idea
+*.md
+!README.md
+
+# Backend (built separately)
+backend/
+ai-engine/
+
+# Docker artifacts
+docker/data
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Python cache
+**/__pycache__
+**/*.pyc
+**/.pytest_cache

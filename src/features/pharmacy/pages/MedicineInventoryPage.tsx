@@ -10,6 +10,7 @@ import { useAuth } from "../../auth";
 import InventoryTable from "../components/InventoryTable";
 import PharmacySnackbar from "../components/PharmacySnackbar";
 import StockAdjustDialog from "../components/StockAdjustDialog";
+import StockReturnDialog from "../components/StockReturnDialog";
 import { usePharmacySnackbar } from "../hooks/usePharmacySnackbar";
 import { useAdjustStock } from "../hooks/useStockMutations";
 import { useStockInventory } from "../hooks/useStock";
@@ -24,6 +25,7 @@ const MedicineInventoryPage = () => {
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 20 });
   const [adjustTarget, setAdjustTarget] = useState<MedicineStock | null>(null);
+  const [returnTarget, setReturnTarget] = useState<MedicineStock | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const { snackbar, showSuccess, closeSnackbar } = usePharmacySnackbar();
 
@@ -75,6 +77,7 @@ const MedicineInventoryPage = () => {
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
         onAdjust={setAdjustTarget}
+        onReturn={setReturnTarget}
         canAdjust={canUpdate}
       />
 
@@ -88,6 +91,12 @@ const MedicineInventoryPage = () => {
         }}
         isSubmitting={adjustStock.isPending}
         serverError={serverError}
+      />
+      <StockReturnDialog
+        stock={returnTarget}
+        open={Boolean(returnTarget)}
+        onClose={() => setReturnTarget(null)}
+        onSuccess={(message) => showSuccess(message)}
       />
       <PharmacySnackbar state={snackbar} onClose={closeSnackbar} />
     </Stack>

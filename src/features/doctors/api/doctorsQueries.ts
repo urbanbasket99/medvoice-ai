@@ -11,6 +11,7 @@ export const doctorsQueryKeys = {
   search: (params: DoctorSearchParams) => [...doctorsQueryKeys.searches(), params] as const,
   details: () => [...doctorsQueryKeys.all, "detail"] as const,
   detail: (id: string) => [...doctorsQueryKeys.details(), id] as const,
+  availability: (id: string) => [...doctorsQueryKeys.all, "availability", id] as const,
 };
 
 export const doctorsListQueryOptions = (params: DoctorListParams) =>
@@ -32,5 +33,12 @@ export const doctorDetailQueryOptions = (id: string | undefined) =>
   queryOptions({
     queryKey: doctorsQueryKeys.detail(id ?? "unknown"),
     queryFn: () => doctorsApi.getById(id as string),
+    enabled: Boolean(id),
+  });
+
+export const doctorAvailabilityQueryOptions = (id: string | undefined) =>
+  queryOptions({
+    queryKey: doctorsQueryKeys.availability(id ?? "unknown"),
+    queryFn: () => doctorsApi.getAvailability(id as string),
     enabled: Boolean(id),
   });

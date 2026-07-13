@@ -10,7 +10,9 @@ export type MedicineCategory =
   | "other";
 
 export type DispenseStatus = "pending" | "in_progress" | "dispensed" | "cancelled";
+export type DispenseType = "prescription" | "retail";
 export type StockMovementType = "purchase" | "dispense" | "adjustment" | "return";
+export type VendorPaymentMethod = "cash" | "cheque" | "bank_transfer" | "upi" | "card" | "other";
 export type MedicineSortField = "created_at" | "updated_at" | "medicine_code" | "brand_name";
 export type DispenseSortField = "created_at" | "updated_at" | "order_number";
 export type SortDirection = "asc" | "desc";
@@ -158,6 +160,13 @@ export interface StockAdjustPayload {
   notes?: string | null;
 }
 
+export interface StockReturnPayload {
+  medicineId: string;
+  batchId?: string | null;
+  quantity: number;
+  notes?: string | null;
+}
+
 export interface StockMovement {
   id: string;
   medicineId: string;
@@ -213,9 +222,10 @@ export interface DispenseStatusEvent {
 export interface DispenseRecord {
   id: string;
   prescriptionId: string | null;
-  consultationId: string;
+  consultationId: string | null;
   patientId: string;
-  doctorId: string;
+  doctorId: string | null;
+  dispenseType: DispenseType;
   dispensedBy: string | null;
   status: DispenseStatus;
   notes: string | null;
@@ -270,7 +280,9 @@ export interface DispenseItemPayload {
 }
 
 export interface CreateDispensePayload {
-  prescriptionId: string;
+  prescriptionId?: string | null;
+  patientId?: string | null;
+  dispenseType?: DispenseType;
   notes?: string | null;
   items: DispenseItemPayload[];
 }
@@ -298,7 +310,7 @@ export interface DispensePrintData {
   dispenseId: string;
   orderNumber: string;
   prescriptionId: string | null;
-  consultationId: string;
+  consultationId: string | null;
   status: string;
   notes: string | null;
   patientName: string | null;
@@ -318,14 +330,67 @@ export interface DispensePrintData {
 export interface PharmacySupplier {
   id: string;
   name: string;
+  code: string | null;
   contactPerson: string | null;
   phone: string | null;
   email: string | null;
   address: string | null;
   isActive: boolean;
   createdAt: string;
+  updatedAt: string | null;
 }
 
 export interface PharmacySupplierListResult {
   items: PharmacySupplier[];
+}
+
+export interface CreateSupplierPayload {
+  name: string;
+  code?: string | null;
+  contactPerson?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  isActive?: boolean;
+}
+
+export interface UpdateSupplierPayload {
+  name?: string;
+  code?: string | null;
+  contactPerson?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  isActive?: boolean;
+}
+
+export interface VendorPayment {
+  id: string;
+  paymentNumber: string;
+  supplierId: string;
+  supplierName: string | null;
+  amount: string;
+  paymentDate: string;
+  paymentMethod: VendorPaymentMethod;
+  referenceNumber: string | null;
+  notes: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export interface VendorPaymentListResult {
+  items: VendorPayment[];
+}
+
+export interface VendorPaymentListParams {
+  supplierId?: string;
+}
+
+export interface CreateVendorPaymentPayload {
+  supplierId: string;
+  amount: string;
+  paymentDate: string;
+  paymentMethod: VendorPaymentMethod;
+  referenceNumber?: string | null;
+  notes?: string | null;
 }

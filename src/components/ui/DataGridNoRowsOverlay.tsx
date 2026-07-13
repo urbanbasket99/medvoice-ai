@@ -13,11 +13,23 @@ const DataGridNoRowsOverlay = ({ message = "No records found" }: DataGridNoRowsO
       alignItems: "center",
       justifyContent: "center",
       height: "100%",
-      py: 4,
-      gap: 1,
+      py: 5,
+      gap: 1.5,
     }}
   >
-    <InboxRoundedIcon sx={{ fontSize: 40, color: "text.disabled" }} aria-hidden />
+    <Box
+      sx={{
+        width: 56,
+        height: 56,
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "action.hover",
+      }}
+    >
+      <InboxRoundedIcon sx={{ fontSize: 28, color: "text.disabled" }} aria-hidden />
+    </Box>
     <Typography variant="body2" color="text.secondary">
       {message}
     </Typography>

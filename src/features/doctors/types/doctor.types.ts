@@ -112,3 +112,27 @@ export type CreateDoctorPayload = DoctorMutationPayload;
 export interface UpdateDoctorPayload extends DoctorMutationPayload {
   status: DoctorStatus;
 }
+
+export interface DoctorAvailabilitySlot {
+  id?: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  slotMinutes: number;
+  isActive: boolean;
+}
+
+export interface DoctorAvailability {
+  doctorId: string;
+  slots: DoctorAvailabilitySlot[];
+}
+
+export interface UpdateDoctorAvailabilityPayload {
+  slots: Array<{
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    slotMinutes: number;
+    isActive: boolean;
+  }>;
+}

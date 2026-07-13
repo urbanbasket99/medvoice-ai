@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../auth";
 import DoctorCard from "../components/DoctorCard";
+import DoctorAvailabilityEditor from "../components/DoctorAvailabilityEditor";
 import DoctorDeleteDialog from "../components/DoctorDeleteDialog";
 import DoctorDetailsSkeleton from "../components/DoctorDetailsSkeleton";
 import DoctorSnackbar from "../components/DoctorSnackbar";
@@ -166,6 +167,8 @@ const DoctorDetailsPage = () => {
           </Box>
         </CardContent>
       </Card>
+
+      <DoctorAvailabilityEditor doctorId={doctor.id} canUpdate={canUpdate} />
 
       <DoctorDeleteDialog
         doctor={confirmingDelete ? doctor : null}
