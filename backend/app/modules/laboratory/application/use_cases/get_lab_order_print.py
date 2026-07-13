@@ -20,6 +20,11 @@ class GetLabOrderPrintUseCase:
                 category=item.category,
                 sample_type=item.sample_type.value,
                 instructions=item.instructions,
+                result_value=item.result_value,
+                result_unit=item.result_unit,
+                reference_range=item.reference_range,
+                result_flag=item.result_flag.value if item.result_flag else None,
+                result_notes=item.result_notes,
             )
             for item in sorted(lab_order.items or [], key=lambda row: row.sort_order)
         ]

@@ -2,7 +2,7 @@ from app.modules.consultations.infrastructure.models.consultation_model import C
 from app.modules.doctors.infrastructure.models.doctor_model import DoctorModel
 from app.modules.laboratory.domain.entities.lab_order import LabOrder, LabOrderItem, LabOrderStatusEvent
 from app.modules.laboratory.domain.entities.lab_test_master import LabTestMaster
-from app.modules.laboratory.domain.value_objects import LabPriority, LabStatus, SampleType
+from app.modules.laboratory.domain.value_objects import LabPriority, LabStatus, ResultFlag, SampleType
 from app.modules.laboratory.infrastructure.models.lab_order_model import (
     LabOrderItemModel,
     LabOrderModel,
@@ -51,6 +51,14 @@ def lab_order_item_to_entity(model: LabOrderItemModel) -> LabOrderItem:
         sample_type=SampleType(model.sample_type),
         instructions=model.instructions,
         sort_order=model.sort_order,
+        result_value=model.result_value,
+        result_unit=model.result_unit,
+        reference_range=model.reference_range,
+        result_flag=ResultFlag(model.result_flag) if model.result_flag else None,
+        result_notes=model.result_notes,
+        resulted_at=model.resulted_at,
+        resulted_by=model.resulted_by,
+        sample_barcode=model.sample_barcode,
     )
 
 
@@ -64,6 +72,14 @@ def lab_order_item_to_model(item: LabOrderItem) -> LabOrderItemModel:
         sample_type=item.sample_type.value,
         instructions=item.instructions,
         sort_order=item.sort_order,
+        result_value=item.result_value,
+        result_unit=item.result_unit,
+        reference_range=item.reference_range,
+        result_flag=item.result_flag.value if item.result_flag else None,
+        result_notes=item.result_notes,
+        resulted_at=item.resulted_at,
+        resulted_by=item.resulted_by,
+        sample_barcode=item.sample_barcode,
     )
 
 
@@ -106,4 +122,5 @@ def lab_order_to_entity(
         doctor_code=doctor.doctor_code if doctor else None,
         doctor_specialization=doctor.specialization if doctor else None,
         consultation_visit_number=consultation.visit_number if consultation else None,
+        is_partial_report=model.is_partial_report,
     )

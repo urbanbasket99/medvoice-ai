@@ -13,13 +13,18 @@ already established by `app.core.exceptions`
 (`{"detail": ..., "error_type": ...}`).
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from app.modules.doctors.application.dto.availability_dto import (
+    AvailabilitySlotInput,
+    ReplaceAvailabilityInput,
+)
 from app.modules.doctors.domain.entities.doctor import Department, Doctor, DoctorStatus, Gender
+from app.modules.doctors.domain.entities.doctor_availability_slot import DoctorAvailabilitySlot
 from app.modules.doctors.domain.value_objects import DoctorPage
 
 
@@ -136,4 +141,56 @@ class DoctorListResponse(BaseModel):
             page=page.page,
             page_size=page.page_size,
             total_pages=page.total_pages,
+        )
+
+
+class AvailabilitySlotRequest(BaseModel):
+    day_of_week: int = Field(ge=0, le=6)
+    start_time: time
+    end_time: time
+    slot_minutes: int = Field(default=30, ge=5, le=480)
+    is_active: bool = True
+
+    def to_input(self) -> AvailabilitySlotInput:
+        return AvailabilitySlotInput(
+            day_of_week=self.day_of_week,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            slot_minutes=self.slot_minutes,
+            is_active=self.is_active,
+        )
+
+
+class DoctorAvailabilityReplaceRequest(BaseModel):
+    slots: list[AvailabilitySlotRequest] = Field(default_factory=list)
+
+    def to_input(self) -> ReplaceAvailabilityInput:
+        return ReplaceAvailabilityInput(slots=tuple(slot.to_input() for slot in self.slots))
+
+
+class AvailabilitySlotResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    doctor_id: UUID
+    day_of_week: int
+    start_time: time
+    end_time: time
+    slot_minutes: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_entity(cls, slot: DoctorAvailabilitySlot) -> "AvailabilitySlotResponse":
+        return cls(
+            id=slot.id,
+            doctor_id=slot.doctor_id,
+            day_of_week=slot.day_of_week,
+            start_time=slot.start_time,
+            end_time=slot.end_time,
+            slot_minutes=slot.slot_minutes,
+            is_active=slot.is_active,
+            created_at=slot.created_at,
+            updated_at=slot.updated_at,
         )

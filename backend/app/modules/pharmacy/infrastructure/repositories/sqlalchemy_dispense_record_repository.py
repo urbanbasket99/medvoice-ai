@@ -44,8 +44,8 @@ class SqlAlchemyDispenseRecordRepository(DispenseRecordRepository):
                 selectinload(DispenseRecordModel.status_history),
             )
             .join(patient, DispenseRecordModel.patient_id == patient.id)
-            .join(doctor, DispenseRecordModel.doctor_id == doctor.id)
-            .join(consultation, DispenseRecordModel.consultation_id == consultation.id)
+            .outerjoin(doctor, DispenseRecordModel.doctor_id == doctor.id)
+            .outerjoin(consultation, DispenseRecordModel.consultation_id == consultation.id)
         )
         return stmt, patient, doctor, consultation
 
@@ -67,6 +67,7 @@ class SqlAlchemyDispenseRecordRepository(DispenseRecordRepository):
     async def create(self, dispense: DispenseRecord) -> DispenseRecord:
         model = DispenseRecordModel(
             id=dispense.id,
+            dispense_type=dispense.dispense_type.value,
             prescription_id=dispense.prescription_id,
             consultation_id=dispense.consultation_id,
             patient_id=dispense.patient_id,
@@ -162,6 +163,8 @@ class SqlAlchemyDispenseRecordRepository(DispenseRecordRepository):
             conditions.append(DispenseRecordModel.doctor_id == criteria.doctor_id)
         if criteria.status is not None:
             conditions.append(DispenseRecordModel.status == criteria.status.value)
+        if criteria.dispense_type is not None:
+            conditions.append(DispenseRecordModel.dispense_type == criteria.dispense_type.value)
 
         sort_column = _SORT_COLUMNS.get(criteria.sort_by.value, DispenseRecordModel.created_at)
         order = sort_column.asc() if criteria.sort_dir == SortDirection.ASC else sort_column.desc()
@@ -200,8 +203,8 @@ class SqlAlchemyDispenseRecordRepository(DispenseRecordRepository):
                     select(func.count())
                     .select_from(DispenseRecordModel)
                     .join(patient, DispenseRecordModel.patient_id == patient.id)
-                    .join(doctor, DispenseRecordModel.doctor_id == doctor.id)
-                    .join(consultation, DispenseRecordModel.consultation_id == consultation.id)
+                    .outerjoin(doctor, DispenseRecordModel.doctor_id == doctor.id)
+                    .outerjoin(consultation, DispenseRecordModel.consultation_id == consultation.id)
                     .where(conditions)
                 )
             ).scalar_one()

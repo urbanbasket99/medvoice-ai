@@ -71,6 +71,7 @@ from app.infrastructure.models.permission import PermissionModel
 from app.infrastructure.models.role import RoleModel
 from app.infrastructure.models.user import UserModel
 from app.infrastructure.security.password_hasher import BcryptPasswordHasher
+from app.modules.accounts.infrastructure.coa_seed import seed_chart_of_accounts
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("app.db.seed")
@@ -149,6 +150,16 @@ PERMISSION_CATALOG: list[tuple[str, str]] = [
     ("billing:create", "Create invoices and record payments"),
     ("billing:update", "Update invoice records"),
     ("billing:delete", "Cancel (soft-delete) invoices"),
+    # Medical certificates bounded context.
+    ("certificates:read", "View medical certificates"),
+    ("certificates:create", "Issue medical certificates"),
+    ("certificates:update", "Update medical certificates"),
+    ("certificates:delete", "Deactivate (soft-delete) medical certificates"),
+    # IPD bounded context (see app/modules/ipd).
+    ("ipd:read", "View IPD wards, beds, and admissions"),
+    ("ipd:create", "Create IPD wards, beds, and admissions"),
+    ("ipd:update", "Update IPD wards, beds, and admissions"),
+    ("ipd:delete", "Deactivate (soft-delete) IPD wards and beds"),
     # Notifications bounded context (see app/modules/notifications).
     ("notifications:read", "View and receive notifications"),
     ("notifications:create", "Create notifications (admin/system)"),
@@ -156,6 +167,11 @@ PERMISSION_CATALOG: list[tuple[str, str]] = [
     ("notifications:delete", "Delete (soft-delete) notifications"),
     # Audit bounded context (see app/modules/audit).
     ("audit:read", "View audit logs and compliance reports"),
+    # Accounts bounded context (see app/modules/accounts).
+    ("accounts:read", "View chart of accounts, vouchers, cash book, and AP"),
+    ("accounts:create", "Create accounts, vouchers, vendor bills, and payments"),
+    ("accounts:update", "Update chart of accounts"),
+    ("accounts:delete", "Delete or deactivate accounts records"),
 ]
 
 DEFAULT_ADMIN_EMAIL = "admin@medvoice.com"
@@ -274,6 +290,8 @@ async def seed_auth() -> None:
             await _grant_permissions_to_role(session, role_id, permissions)
             user_id = await _get_or_create_admin_user(session)
             await _assign_role_to_user(session, user_id, role_id)
+            coa_inserted = await seed_chart_of_accounts(session)
+            logger.info("Chart of accounts: %d newly inserted", coa_inserted)
             await session.commit()
             logger.info("Authentication seed completed successfully.")
         except Exception:

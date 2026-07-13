@@ -44,6 +44,13 @@ class SqlAlchemyPatientRepository(PatientRepository):
         model = result.scalar_one_or_none()
         return patient_to_entity(model) if model else None
 
+    async def get_by_mrn(self, mrn: str) -> Patient | None:
+        result = await self._session.execute(
+            select(PatientModel).where(PatientModel.mrn == mrn, PatientModel.deleted_at.is_(None))
+        )
+        model = result.scalar_one_or_none()
+        return patient_to_entity(model) if model else None
+
     async def exists_by_mobile(self, mobile: str, exclude_id: UUID | None = None) -> bool:
         stmt = select(PatientModel.id).where(
             PatientModel.mobile == mobile, PatientModel.deleted_at.is_(None)

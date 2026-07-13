@@ -2,10 +2,29 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID, uuid4
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, Uuid, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+
+class TpaModel(Base):
+    __tablename__ = "tpas"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    code: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    contact_person: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    address: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
 
 class InvoiceModel(Base):
@@ -13,8 +32,11 @@ class InvoiceModel(Base):
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     invoice_number: Mapped[str] = mapped_column(String(30), nullable=False, unique=True, index=True)
-    consultation_id: Mapped[UUID] = mapped_column(
-        Uuid, ForeignKey("consultations.id", ondelete="RESTRICT"), nullable=False, index=True
+    consultation_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("consultations.id", ondelete="RESTRICT"), nullable=True, index=True
+    )
+    admission_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("ipd_admissions.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     patient_id: Mapped[UUID] = mapped_column(
         Uuid, ForeignKey("patients.id", ondelete="RESTRICT"), nullable=False, index=True
@@ -31,6 +53,11 @@ class InvoiceModel(Base):
     paid_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, server_default="0")
     balance: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, server_default="0")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_provisional: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    is_tpa: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    tpa_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("tpas.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -121,6 +148,10 @@ class InsuranceClaimModel(Base):
     claimed_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     approved_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tpa_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("tpas.id", ondelete="SET NULL"), nullable=True
+    )
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

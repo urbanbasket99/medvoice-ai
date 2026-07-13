@@ -38,6 +38,17 @@ class SqlAlchemyPharmacyMedicineRepository(PharmacyMedicineRepository):
         model = result.scalar_one_or_none()
         return pharmacy_medicine_to_entity(model) if model else None
 
+    async def get_by_barcode(self, barcode: str) -> PharmacyMedicine | None:
+        result = await self._session.execute(
+            select(PharmacyMedicineModel).where(
+                PharmacyMedicineModel.barcode == barcode,
+                PharmacyMedicineModel.deleted_at.is_(None),
+                PharmacyMedicineModel.is_active.is_(True),
+            )
+        )
+        model = result.scalar_one_or_none()
+        return pharmacy_medicine_to_entity(model) if model else None
+
     async def create(self, medicine: PharmacyMedicine) -> PharmacyMedicine:
         model = PharmacyMedicineModel(
             id=medicine.id,

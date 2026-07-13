@@ -8,8 +8,12 @@ from app.modules.laboratory.application.dto.lab_order_dto import (
     CreateLabOrderInput,
     LabOrderItemInput,
     LabOrderPrintOutput,
+    LabResultItemInput,
+    LabResultsPrintOutput,
     UpdateLabOrderInput,
     UpdateLabOrderStatusInput,
+    SendLabResultsEmailInput,
+    UpdateLabResultsInput,
 )
 from app.modules.laboratory.domain.entities.lab_order import LabOrder, LabOrderItem, LabOrderStatusEvent
 from app.modules.laboratory.domain.entities.lab_test_master import LabTestMaster
@@ -17,6 +21,7 @@ from app.modules.laboratory.domain.value_objects import (
     LabOrderPage,
     LabPriority,
     LabStatus,
+    ResultFlag,
     SampleType,
 )
 
@@ -76,6 +81,61 @@ class LabOrderStatusUpdateRequest(BaseModel):
         return UpdateLabOrderStatusInput(status=self.status.value, notes=self.notes)
 
 
+class LabResultItemRequest(BaseModel):
+    id: UUID
+    result_value: str | None = Field(default=None, max_length=200)
+    result_unit: str | None = Field(default=None, max_length=50)
+    reference_range: str | None = Field(default=None, max_length=100)
+    result_flag: ResultFlag | None = None
+    result_notes: str | None = Field(default=None, max_length=4000)
+    sample_barcode: str | None = Field(default=None, max_length=64)
+
+    def to_input(self) -> LabResultItemInput:
+        return LabResultItemInput(
+            id=self.id,
+            result_value=self.result_value,
+            result_unit=self.result_unit,
+            reference_range=self.reference_range,
+            result_flag=self.result_flag,
+            result_notes=self.result_notes,
+            sample_barcode=self.sample_barcode,
+        )
+
+
+class LabResultsUpdateRequest(BaseModel):
+    items: list[LabResultItemRequest] = Field(min_length=1)
+    is_partial_report: bool = False
+
+    def to_input(self) -> UpdateLabResultsInput:
+        return UpdateLabResultsInput(
+            items=tuple(item.to_input() for item in self.items),
+            is_partial_report=self.is_partial_report,
+        )
+
+
+class LabResultsEmailRequest(BaseModel):
+    recipient_email: str = Field(min_length=3, max_length=255)
+    recipient_role: str | None = Field(default=None, max_length=30)
+
+    def to_input(self) -> SendLabResultsEmailInput:
+        return SendLabResultsEmailInput(
+            recipient_email=self.recipient_email,
+            recipient_role=self.recipient_role,
+        )
+
+
+class ReportEmailDeliveryResponse(BaseModel):
+    id: UUID
+    resource_type: str
+    resource_id: UUID
+    recipient_email: str
+    recipient_role: str | None
+    subject: str
+    status: str
+    sent_at: datetime | None
+    created_at: datetime
+
+
 class LabOrderItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -87,6 +147,14 @@ class LabOrderItemResponse(BaseModel):
     sample_type: SampleType
     instructions: str | None
     sort_order: int
+    result_value: str | None = None
+    result_unit: str | None = None
+    reference_range: str | None = None
+    result_flag: ResultFlag | None = None
+    result_notes: str | None = None
+    resulted_at: datetime | None = None
+    resulted_by: UUID | None = None
+    sample_barcode: str | None = None
 
     @classmethod
     def from_entity(cls, item: LabOrderItem) -> "LabOrderItemResponse":
@@ -99,6 +167,14 @@ class LabOrderItemResponse(BaseModel):
             sample_type=item.sample_type,
             instructions=item.instructions,
             sort_order=item.sort_order,
+            result_value=item.result_value,
+            result_unit=item.result_unit,
+            reference_range=item.reference_range,
+            result_flag=item.result_flag,
+            result_notes=item.result_notes,
+            resulted_at=item.resulted_at,
+            resulted_by=item.resulted_by,
+            sample_barcode=item.sample_barcode,
         )
 
 
@@ -144,6 +220,7 @@ class LabOrderResponse(BaseModel):
     doctor_code: str | None = None
     doctor_specialization: str | None = None
     consultation_visit_number: str | None = None
+    is_partial_report: bool = False
     items: list[LabOrderItemResponse] = Field(default_factory=list)
     status_history: list[LabOrderStatusEventResponse] = Field(default_factory=list)
 
@@ -169,6 +246,7 @@ class LabOrderResponse(BaseModel):
             doctor_code=lab_order.doctor_code,
             doctor_specialization=lab_order.doctor_specialization,
             consultation_visit_number=lab_order.consultation_visit_number,
+            is_partial_report=lab_order.is_partial_report,
             items=[LabOrderItemResponse.from_entity(item) for item in lab_order.items or []],
             status_history=[
                 LabOrderStatusEventResponse.from_entity(event)
@@ -255,6 +333,11 @@ class LabOrderPrintItemResponse(BaseModel):
     category: str | None
     sample_type: str
     instructions: str | None
+    result_value: str | None = None
+    result_unit: str | None = None
+    reference_range: str | None = None
+    result_flag: str | None = None
+    result_notes: str | None = None
 
 
 class LabOrderPrintResponse(BaseModel):
@@ -300,6 +383,74 @@ class LabOrderPrintResponse(BaseModel):
                     category=item.category,
                     sample_type=item.sample_type,
                     instructions=item.instructions,
+                    result_value=item.result_value,
+                    result_unit=item.result_unit,
+                    reference_range=item.reference_range,
+                    result_flag=item.result_flag,
+                    result_notes=item.result_notes,
+                )
+                for item in output.items
+            ],
+            created_at=output.created_at,
+        )
+
+
+class LabResultsPrintItemResponse(BaseModel):
+    lab_test_name: str
+    category: str | None
+    sample_type: str
+    result_value: str | None
+    result_unit: str | None
+    reference_range: str | None
+    result_flag: str | None
+    result_notes: str | None
+    resulted_at: datetime | None
+
+
+class LabResultsPrintResponse(BaseModel):
+    lab_order_id: UUID
+    order_number: str
+    consultation_id: UUID
+    status: str
+    patient_name: str | None
+    patient_mrn: str | None
+    patient_uhid: str | None
+    patient_gender: str | None
+    patient_date_of_birth: date | None
+    doctor_name: str | None
+    doctor_code: str | None
+    doctor_specialization: str | None
+    consultation_visit_number: str | None
+    items: list[LabResultsPrintItemResponse]
+    created_at: datetime
+
+    @classmethod
+    def from_output(cls, output: LabResultsPrintOutput) -> "LabResultsPrintResponse":
+        return cls(
+            lab_order_id=output.lab_order_id,
+            order_number=output.order_number,
+            consultation_id=output.consultation_id,
+            status=output.status,
+            patient_name=output.patient_name,
+            patient_mrn=output.patient_mrn,
+            patient_uhid=output.patient_uhid,
+            patient_gender=output.patient_gender,
+            patient_date_of_birth=output.patient_date_of_birth,
+            doctor_name=output.doctor_name,
+            doctor_code=output.doctor_code,
+            doctor_specialization=output.doctor_specialization,
+            consultation_visit_number=output.consultation_visit_number,
+            items=[
+                LabResultsPrintItemResponse(
+                    lab_test_name=item.lab_test_name,
+                    category=item.category,
+                    sample_type=item.sample_type,
+                    result_value=item.result_value,
+                    result_unit=item.result_unit,
+                    reference_range=item.reference_range,
+                    result_flag=item.result_flag,
+                    result_notes=item.result_notes,
+                    resulted_at=item.resulted_at,
                 )
                 for item in output.items
             ],

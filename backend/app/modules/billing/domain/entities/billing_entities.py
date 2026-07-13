@@ -65,13 +65,14 @@ class InsuranceClaim:
     claimed_amount: Decimal | None = None
     approved_amount: Decimal | None = None
     notes: str | None = None
+    tpa_id: UUID | None = None
+    submitted_at: datetime | None = None
 
 
 @dataclass(slots=True)
 class Invoice:
     id: UUID
     invoice_number: str
-    consultation_id: UUID
     patient_id: UUID
     doctor_id: UUID
     invoice_date: date
@@ -84,8 +85,13 @@ class Invoice:
     balance: Decimal
     created_at: datetime
     updated_at: datetime
+    consultation_id: UUID | None = None
+    admission_id: UUID | None = None
     notes: str | None = None
     deleted_at: datetime | None = None
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
     items: list[InvoiceItem] | None = None
     payments: list[Payment] | None = None
     status_events: list[InvoiceStatusEvent] | None = None

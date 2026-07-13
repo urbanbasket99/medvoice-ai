@@ -3,7 +3,13 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from app.modules.pharmacy.domain.value_objects import DispenseStatus, MedicineCategory
+from app.modules.pharmacy.domain.value_objects import (
+    DispenseStatus,
+    DispenseType,
+    MedicineCategory,
+    StockReturnKind,
+    VendorPaymentMethod,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,11 +107,55 @@ class DispenseItemInput:
 
 @dataclass(frozen=True, slots=True)
 class CreateDispenseInput:
-    prescription_id: UUID
     status: DispenseStatus
+    dispense_type: DispenseType = DispenseType.PRESCRIPTION
+    prescription_id: UUID | None = None
+    patient_id: UUID | None = None
     notes: str | None = None
     dispensed_by: UUID | None = None
     items: tuple[DispenseItemInput, ...] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CreateSupplierInput:
+    name: str
+    code: str | None = None
+    contact_person: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    address: str | None = None
+    is_active: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class UpdateSupplierInput:
+    name: str
+    code: str | None = None
+    contact_person: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    address: str | None = None
+    is_active: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class CreateVendorPaymentInput:
+    supplier_id: UUID
+    amount: Decimal
+    payment_date: date
+    payment_method: VendorPaymentMethod
+    reference_number: str | None = None
+    notes: str | None = None
+    created_by: UUID | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class StockReturnInput:
+    medicine_id: UUID
+    quantity: int
+    return_kind: StockReturnKind
+    batch_id: UUID | None = None
+    notes: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

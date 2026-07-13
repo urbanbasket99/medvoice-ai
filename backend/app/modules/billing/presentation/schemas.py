@@ -5,14 +5,18 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.modules.billing.application.dto.billing_dto import (
+    CreateClaimInput,
     CreateInvoiceInput,
+    CreateTpaInput,
     InvoiceItemInput,
     InvoiceItemPrint,
+    InvoiceItemSuggestion,
     InvoicePrintOutput,
     PaymentInput,
     PaymentPrintOutput,
+    UpdateClaimInput,
     UpdateInvoiceInput,
-    InvoiceItemSuggestion,
+    UpdateTpaInput,
 )
 from app.modules.billing.domain.entities.billing_entities import (
     InsuranceClaim,
@@ -21,9 +25,12 @@ from app.modules.billing.domain.entities.billing_entities import (
     InvoiceStatusEvent,
     Payment,
 )
+from app.modules.billing.domain.entities.tpa import Tpa
 from app.modules.billing.domain.value_objects import (
     BillingDepartment,
     ClaimStatus,
+    CollectionReportGroupBy,
+    CollectionReportRow,
     InvoicePage,
     InvoiceStatus,
     PaymentMethod,
@@ -65,6 +72,9 @@ class InvoiceCreateRequest(BaseModel):
     items: list[InvoiceItemRequest] = Field(min_length=1)
     discount_amount: Decimal = Field(ge=0, default=Decimal("0"))
     tax_amount: Decimal = Field(ge=0, default=Decimal("0"))
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
 
     def to_input(self) -> CreateInvoiceInput:
         return CreateInvoiceInput(
@@ -74,6 +84,9 @@ class InvoiceCreateRequest(BaseModel):
             items=tuple(item.to_input() for item in self.items),
             discount_amount=self.discount_amount,
             tax_amount=self.tax_amount,
+            is_provisional=self.is_provisional,
+            is_tpa=self.is_tpa,
+            tpa_id=self.tpa_id,
         )
 
 
@@ -83,6 +96,9 @@ class InvoiceUpdateRequest(BaseModel):
     items: list[InvoiceItemRequest] = Field(min_length=1)
     discount_amount: Decimal = Field(ge=0, default=Decimal("0"))
     tax_amount: Decimal = Field(ge=0, default=Decimal("0"))
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
 
     def to_input(self) -> UpdateInvoiceInput:
         return UpdateInvoiceInput(
@@ -91,6 +107,9 @@ class InvoiceUpdateRequest(BaseModel):
             items=tuple(item.to_input() for item in self.items),
             discount_amount=self.discount_amount,
             tax_amount=self.tax_amount,
+            is_provisional=self.is_provisional,
+            is_tpa=self.is_tpa,
+            tpa_id=self.tpa_id,
         )
 
 
@@ -182,6 +201,8 @@ class InsuranceClaimResponse(BaseModel):
     claimed_amount: Decimal | None
     approved_amount: Decimal | None
     notes: str | None
+    tpa_id: UUID | None
+    submitted_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
@@ -196,6 +217,8 @@ class InsuranceClaimResponse(BaseModel):
             claimed_amount=claim.claimed_amount,
             approved_amount=claim.approved_amount,
             notes=claim.notes,
+            tpa_id=claim.tpa_id,
+            submitted_at=claim.submitted_at,
             created_at=claim.created_at,
             updated_at=claim.updated_at,
         )
@@ -236,7 +259,8 @@ class InvoiceResponse(BaseModel):
 
     id: UUID
     invoice_number: str
-    consultation_id: UUID
+    consultation_id: UUID | None
+    admission_id: UUID | None = None
     patient_id: UUID
     doctor_id: UUID
     invoice_date: date
@@ -248,6 +272,9 @@ class InvoiceResponse(BaseModel):
     paid_amount: Decimal
     balance: Decimal
     notes: str | None
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
     patient_name: str | None = None
@@ -270,6 +297,7 @@ class InvoiceResponse(BaseModel):
             id=invoice.id,
             invoice_number=invoice.invoice_number,
             consultation_id=invoice.consultation_id,
+            admission_id=invoice.admission_id,
             patient_id=invoice.patient_id,
             doctor_id=invoice.doctor_id,
             invoice_date=invoice.invoice_date,
@@ -281,6 +309,9 @@ class InvoiceResponse(BaseModel):
             paid_amount=invoice.paid_amount,
             balance=invoice.balance,
             notes=invoice.notes,
+            is_provisional=invoice.is_provisional,
+            is_tpa=invoice.is_tpa,
+            tpa_id=invoice.tpa_id,
             created_at=invoice.created_at,
             updated_at=invoice.updated_at,
             patient_name=invoice.patient_name,
@@ -468,3 +499,165 @@ class ConsultationChargesResponse(BaseModel):
     @classmethod
     def from_dtos(cls, dtos: list[InvoiceItemSuggestion]) -> "ConsultationChargesResponse":
         return cls(items=[InvoiceItemSuggestionResponse.from_dto(d) for d in dtos])
+
+
+# ---- TPA ----
+
+class TpaCreateRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=30)
+    name: str = Field(min_length=1, max_length=200)
+    contact_person: str | None = Field(default=None, max_length=150)
+    phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=255)
+    address: str | None = None
+    is_active: bool = True
+
+    def to_input(self) -> CreateTpaInput:
+        return CreateTpaInput(
+            code=self.code,
+            name=self.name,
+            contact_person=self.contact_person,
+            phone=self.phone,
+            email=self.email,
+            address=self.address,
+            is_active=self.is_active,
+        )
+
+
+class TpaUpdateRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=30)
+    name: str = Field(min_length=1, max_length=200)
+    contact_person: str | None = Field(default=None, max_length=150)
+    phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=255)
+    address: str | None = None
+    is_active: bool = True
+
+    def to_input(self) -> UpdateTpaInput:
+        return UpdateTpaInput(
+            code=self.code,
+            name=self.name,
+            contact_person=self.contact_person,
+            phone=self.phone,
+            email=self.email,
+            address=self.address,
+            is_active=self.is_active,
+        )
+
+
+class TpaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    code: str
+    name: str
+    contact_person: str | None
+    phone: str | None
+    email: str | None
+    address: str | None
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_entity(cls, tpa: Tpa) -> "TpaResponse":
+        return cls(
+            id=tpa.id,
+            code=tpa.code,
+            name=tpa.name,
+            contact_person=tpa.contact_person,
+            phone=tpa.phone,
+            email=tpa.email,
+            address=tpa.address,
+            is_active=tpa.is_active,
+            created_at=tpa.created_at,
+            updated_at=tpa.updated_at,
+        )
+
+
+# ---- Insurance claims ----
+
+class ClaimCreateRequest(BaseModel):
+    claim_number: str | None = Field(default=None, max_length=50)
+    insurer_name: str | None = Field(default=None, max_length=200)
+    status: ClaimStatus = ClaimStatus.PENDING
+    claimed_amount: Decimal | None = Field(default=None, ge=0)
+    approved_amount: Decimal | None = Field(default=None, ge=0)
+    notes: str | None = None
+    tpa_id: UUID | None = None
+
+    def to_input(self) -> CreateClaimInput:
+        return CreateClaimInput(
+            claim_number=self.claim_number,
+            insurer_name=self.insurer_name,
+            status=self.status.value,
+            claimed_amount=self.claimed_amount,
+            approved_amount=self.approved_amount,
+            notes=self.notes,
+            tpa_id=self.tpa_id,
+        )
+
+
+class ClaimUpdateRequest(BaseModel):
+    claim_number: str | None = Field(default=None, max_length=50)
+    insurer_name: str | None = Field(default=None, max_length=200)
+    status: ClaimStatus = ClaimStatus.PENDING
+    claimed_amount: Decimal | None = Field(default=None, ge=0)
+    approved_amount: Decimal | None = Field(default=None, ge=0)
+    notes: str | None = None
+    tpa_id: UUID | None = None
+
+    def to_input(self) -> UpdateClaimInput:
+        return UpdateClaimInput(
+            claim_number=self.claim_number,
+            insurer_name=self.insurer_name,
+            status=self.status.value,
+            claimed_amount=self.claimed_amount,
+            approved_amount=self.approved_amount,
+            notes=self.notes,
+            tpa_id=self.tpa_id,
+        )
+
+
+# ---- Collection reports ----
+
+class CollectionReportRowResponse(BaseModel):
+    group_key: str
+    group_label: str
+    invoice_count: int
+    total_billed: Decimal
+    total_collected: Decimal
+    outstanding: Decimal
+
+    @classmethod
+    def from_row(cls, row: CollectionReportRow) -> "CollectionReportRowResponse":
+        return cls(
+            group_key=row.group_key,
+            group_label=row.group_label,
+            invoice_count=row.invoice_count,
+            total_billed=row.total_billed,
+            total_collected=row.total_collected,
+            outstanding=row.outstanding,
+        )
+
+
+class CollectionReportResponse(BaseModel):
+    group_by: CollectionReportGroupBy
+    date_from: date
+    date_to: date
+    rows: list[CollectionReportRowResponse]
+
+    @classmethod
+    def from_rows(
+        cls,
+        group_by: CollectionReportGroupBy,
+        date_from: date,
+        date_to: date,
+        rows: list[CollectionReportRow],
+    ) -> "CollectionReportResponse":
+        return cls(
+            group_by=group_by,
+            date_from=date_from,
+            date_to=date_to,
+            rows=[CollectionReportRowResponse.from_row(r) for r in rows],
+        )

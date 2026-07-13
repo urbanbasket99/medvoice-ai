@@ -5,6 +5,7 @@ from app.modules.billing.domain.entities.billing_entities import (
     InvoiceStatusEvent,
     Payment,
 )
+from app.modules.billing.domain.entities.tpa import Tpa
 from app.modules.billing.domain.value_objects import (
     BillingDepartment,
     ClaimStatus,
@@ -18,6 +19,7 @@ from app.modules.billing.infrastructure.models.billing_model import (
     InvoiceModel,
     InvoiceStatusEventModel,
     PaymentModel,
+    TpaModel,
 )
 from app.modules.consultations.infrastructure.models.consultation_model import ConsultationModel
 from app.modules.doctors.infrastructure.models.doctor_model import DoctorModel
@@ -27,6 +29,21 @@ from app.modules.patients.infrastructure.models.patient_model import PatientMode
 def _patient_display_name(patient: PatientModel) -> str:
     parts = [patient.first_name, patient.middle_name, patient.last_name]
     return " ".join(part for part in parts if part).strip()
+
+
+def tpa_to_entity(model: TpaModel) -> Tpa:
+    return Tpa(
+        id=model.id,
+        code=model.code,
+        name=model.name,
+        contact_person=model.contact_person,
+        phone=model.phone,
+        email=model.email,
+        address=model.address,
+        is_active=model.is_active,
+        created_at=model.created_at,
+        updated_at=model.updated_at,
+    )
 
 
 def invoice_item_to_entity(model: InvoiceItemModel) -> InvoiceItem:
@@ -102,8 +119,27 @@ def insurance_claim_to_entity(model: InsuranceClaimModel) -> InsuranceClaim:
         claimed_amount=model.claimed_amount,
         approved_amount=model.approved_amount,
         notes=model.notes,
+        tpa_id=model.tpa_id,
+        submitted_at=model.submitted_at,
         created_at=model.created_at,
         updated_at=model.updated_at,
+    )
+
+
+def insurance_claim_to_model(claim: InsuranceClaim) -> InsuranceClaimModel:
+    return InsuranceClaimModel(
+        id=claim.id,
+        invoice_id=claim.invoice_id,
+        claim_number=claim.claim_number,
+        insurer_name=claim.insurer_name,
+        status=claim.status.value,
+        claimed_amount=claim.claimed_amount,
+        approved_amount=claim.approved_amount,
+        notes=claim.notes,
+        tpa_id=claim.tpa_id,
+        submitted_at=claim.submitted_at,
+        created_at=claim.created_at,
+        updated_at=claim.updated_at,
     )
 
 
@@ -137,6 +173,7 @@ def invoice_to_entity(
         id=model.id,
         invoice_number=model.invoice_number,
         consultation_id=model.consultation_id,
+        admission_id=model.admission_id,
         patient_id=model.patient_id,
         doctor_id=model.doctor_id,
         invoice_date=model.invoice_date,
@@ -148,6 +185,9 @@ def invoice_to_entity(
         paid_amount=model.paid_amount,
         balance=model.balance,
         notes=model.notes,
+        is_provisional=model.is_provisional,
+        is_tpa=model.is_tpa,
+        tpa_id=model.tpa_id,
         created_at=model.created_at,
         updated_at=model.updated_at,
         deleted_at=model.deleted_at,

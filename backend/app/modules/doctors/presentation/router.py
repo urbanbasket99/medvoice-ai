@@ -21,8 +21,10 @@ from app.modules.doctors.domain.value_objects import (
 from app.modules.doctors.presentation.dependencies import (
     CreateDoctorUseCaseDep,
     DeleteDoctorUseCaseDep,
+    GetDoctorAvailabilityUseCaseDep,
     GetDoctorUseCaseDep,
     GetDoctorsUseCaseDep,
+    ReplaceDoctorAvailabilityUseCaseDep,
     RequireDoctorsCreate,
     RequireDoctorsDelete,
     RequireDoctorsRead,
@@ -31,6 +33,8 @@ from app.modules.doctors.presentation.dependencies import (
     UpdateDoctorUseCaseDep,
 )
 from app.modules.doctors.presentation.schemas import (
+    AvailabilitySlotResponse,
+    DoctorAvailabilityReplaceRequest,
     DoctorCreateRequest,
     DoctorListResponse,
     DoctorResponse,
@@ -85,6 +89,27 @@ async def search_doctors(
 ) -> DoctorListResponse:
     result = await use_case.execute(q, page, page_size)
     return DoctorListResponse.from_page(result)
+
+
+@router.get("/{doctor_id}/availability", response_model=list[AvailabilitySlotResponse])
+async def get_doctor_availability(
+    doctor_id: UUID,
+    _: RequireDoctorsRead,
+    use_case: GetDoctorAvailabilityUseCaseDep,
+) -> list[AvailabilitySlotResponse]:
+    slots = await use_case.execute(doctor_id)
+    return [AvailabilitySlotResponse.from_entity(slot) for slot in slots]
+
+
+@router.put("/{doctor_id}/availability", response_model=list[AvailabilitySlotResponse])
+async def replace_doctor_availability(
+    doctor_id: UUID,
+    payload: DoctorAvailabilityReplaceRequest,
+    _: RequireDoctorsUpdate,
+    use_case: ReplaceDoctorAvailabilityUseCaseDep,
+) -> list[AvailabilitySlotResponse]:
+    slots = await use_case.execute(doctor_id, payload.to_input())
+    return [AvailabilitySlotResponse.from_entity(slot) for slot in slots]
 
 
 @router.get("/{doctor_id}", response_model=DoctorResponse)

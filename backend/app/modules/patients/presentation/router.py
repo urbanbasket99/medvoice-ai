@@ -11,7 +11,7 @@ here to stamp `created_by`/`updated_by`. `/search` is declared before
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.modules.patients.application.dto.patient_dto import CreatePatientInput, UpdatePatientInput
 from app.modules.patients.domain.entities.patient import BloodGroup, Gender, PatientStatus
@@ -23,6 +23,7 @@ from app.modules.patients.domain.value_objects import (
 from app.modules.patients.presentation.dependencies import (
     CreatePatientUseCaseDep,
     DeletePatientUseCaseDep,
+    GetPatientByIdentifierUseCaseDep,
     GetPatientUseCaseDep,
     GetPatientsUseCaseDep,
     RequirePatientsCreate,
@@ -87,6 +88,27 @@ async def search_patients(
 ) -> PatientListResponse:
     result = await use_case.execute(q, page, page_size)
     return PatientListResponse.from_page(result)
+
+
+@router.get("/lookup", response_model=PatientResponse)
+async def lookup_patient(
+    _: RequirePatientsRead,
+    use_case: GetPatientByIdentifierUseCaseDep,
+    uhid: Annotated[str | None, Query(min_length=1, max_length=20)] = None,
+    mrn: Annotated[str | None, Query(min_length=1, max_length=20)] = None,
+) -> PatientResponse:
+    """Lookup by UHID or MRN. Declared before `/{patient_id}` so FastAPI does not
+    treat the literal path segment `lookup` as a UUID.
+    """
+    if not uhid and not mrn:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Provide uhid or mrn.")
+    if uhid and mrn:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Provide either uhid or mrn, not both.",
+        )
+    patient = await use_case.execute(uhid=uhid, mrn=mrn)
+    return PatientResponse.from_entity(patient)
 
 
 @router.get("/{patient_id}", response_model=PatientResponse)

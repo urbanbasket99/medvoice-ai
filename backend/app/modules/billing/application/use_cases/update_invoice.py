@@ -53,5 +53,8 @@ class UpdateInvoiceUseCase:
         existing.subtotal = subtotal
         existing.grand_total = grand_total
         existing.balance = balance
+        existing.is_provisional = data.is_provisional
+        existing.is_tpa = data.is_tpa
+        existing.tpa_id = data.tpa_id
         existing.updated_at = datetime.now(UTC)
         return await self._invoices.update(existing)

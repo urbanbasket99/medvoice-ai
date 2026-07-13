@@ -18,6 +18,9 @@ from app.modules.patients.application.interfaces.uhid_generator import UhidGener
 from app.modules.patients.application.use_cases.create_patient import CreatePatientUseCase
 from app.modules.patients.application.use_cases.delete_patient import DeletePatientUseCase
 from app.modules.patients.application.use_cases.get_patient import GetPatientUseCase
+from app.modules.patients.application.use_cases.get_patient_by_identifier import (
+    GetPatientByIdentifierUseCase,
+)
 from app.modules.patients.application.use_cases.get_patients import GetPatientsUseCase
 from app.modules.patients.application.use_cases.search_patients import SearchPatientsUseCase
 from app.modules.patients.application.use_cases.update_patient import UpdatePatientUseCase
@@ -66,6 +69,12 @@ def provide_get_patient_use_case(patient_repository: PatientRepositoryDep) -> Ge
     return GetPatientUseCase(patient_repository)
 
 
+def provide_get_patient_by_identifier_use_case(
+    patient_repository: PatientRepositoryDep,
+) -> GetPatientByIdentifierUseCase:
+    return GetPatientByIdentifierUseCase(patient_repository)
+
+
 def provide_get_patients_use_case(patient_repository: PatientRepositoryDep) -> GetPatientsUseCase:
     return GetPatientsUseCase(patient_repository)
 
@@ -78,6 +87,9 @@ CreatePatientUseCaseDep = Annotated[CreatePatientUseCase, Depends(provide_create
 UpdatePatientUseCaseDep = Annotated[UpdatePatientUseCase, Depends(provide_update_patient_use_case)]
 DeletePatientUseCaseDep = Annotated[DeletePatientUseCase, Depends(provide_delete_patient_use_case)]
 GetPatientUseCaseDep = Annotated[GetPatientUseCase, Depends(provide_get_patient_use_case)]
+GetPatientByIdentifierUseCaseDep = Annotated[
+    GetPatientByIdentifierUseCase, Depends(provide_get_patient_by_identifier_use_case)
+]
 GetPatientsUseCaseDep = Annotated[GetPatientsUseCase, Depends(provide_get_patients_use_case)]
 SearchPatientsUseCaseDep = Annotated[SearchPatientsUseCase, Depends(provide_search_patients_use_case)]
 

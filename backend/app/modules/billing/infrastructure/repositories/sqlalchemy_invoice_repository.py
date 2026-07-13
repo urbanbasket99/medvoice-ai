@@ -1,13 +1,17 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
+from app.infrastructure.models.user import UserModel
 from app.modules.billing.domain.entities.billing_entities import Invoice
 from app.modules.billing.domain.repositories.invoice_repository import InvoiceRepository
 from app.modules.billing.domain.value_objects import (
+    CollectionReportGroupBy,
+    CollectionReportRow,
     InvoiceListCriteria,
     InvoicePage,
     InvoiceStatus,
@@ -17,6 +21,7 @@ from app.modules.billing.infrastructure.models.billing_model import (
     InvoiceItemModel,
     InvoiceModel,
     InvoiceStatusEventModel,
+    PaymentModel,
 )
 from app.modules.billing.infrastructure.repositories.mappers import (
     invoice_item_to_model,
@@ -56,7 +61,7 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
             )
             .join(patient, InvoiceModel.patient_id == patient.id)
             .join(doctor, InvoiceModel.doctor_id == doctor.id)
-            .join(consultation, InvoiceModel.consultation_id == consultation.id)
+            .outerjoin(consultation, InvoiceModel.consultation_id == consultation.id)
         )
         return stmt, patient, doctor, consultation
 
@@ -80,6 +85,7 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
             id=invoice.id,
             invoice_number=invoice.invoice_number,
             consultation_id=invoice.consultation_id,
+            admission_id=invoice.admission_id,
             patient_id=invoice.patient_id,
             doctor_id=invoice.doctor_id,
             invoice_date=invoice.invoice_date,
@@ -91,6 +97,9 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
             paid_amount=invoice.paid_amount,
             balance=invoice.balance,
             notes=invoice.notes,
+            is_provisional=invoice.is_provisional,
+            is_tpa=invoice.is_tpa,
+            tpa_id=invoice.tpa_id,
         )
         if invoice.items:
             model.items = [invoice_item_to_model(item) for item in invoice.items]
@@ -116,6 +125,9 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
                 paid_amount=invoice.paid_amount,
                 balance=invoice.balance,
                 notes=invoice.notes,
+                is_provisional=invoice.is_provisional,
+                is_tpa=invoice.is_tpa,
+                tpa_id=invoice.tpa_id,
                 updated_at=invoice.updated_at,
             )
         )
@@ -218,7 +230,7 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
                 .select_from(InvoiceModel)
                 .join(patient, InvoiceModel.patient_id == patient.id)
                 .join(doctor, InvoiceModel.doctor_id == doctor.id)
-                .join(consultation, InvoiceModel.consultation_id == consultation.id)
+                .outerjoin(consultation, InvoiceModel.consultation_id == consultation.id)
                 .where(conditions)
             )
         ).scalar_one()
@@ -256,3 +268,116 @@ class SqlAlchemyInvoiceRepository(InvoiceRepository):
         )
         items = [self._map_row(row) for row in result.all()]
         return InvoicePage(items=items, total=total, page=page, page_size=page_size)
+
+    async def get_collection_report(
+        self,
+        date_from: date,
+        date_to: date,
+        group_by: CollectionReportGroupBy,
+    ) -> list[CollectionReportRow]:
+        base_filter = and_(
+            InvoiceModel.deleted_at.is_(None),
+            InvoiceModel.invoice_date >= date_from,
+            InvoiceModel.invoice_date <= date_to,
+        )
+
+        if group_by == CollectionReportGroupBy.DOCTOR:
+            stmt = (
+                select(
+                    InvoiceModel.doctor_id,
+                    DoctorModel.full_name,
+                    func.count(InvoiceModel.id),
+                    func.coalesce(func.sum(InvoiceModel.grand_total), 0),
+                    func.coalesce(func.sum(InvoiceModel.paid_amount), 0),
+                    func.coalesce(func.sum(InvoiceModel.balance), 0),
+                )
+                .join(DoctorModel, InvoiceModel.doctor_id == DoctorModel.id)
+                .where(base_filter)
+                .group_by(InvoiceModel.doctor_id, DoctorModel.full_name)
+                .order_by(DoctorModel.full_name)
+            )
+            result = await self._session.execute(stmt)
+            return [
+                CollectionReportRow(
+                    group_key=str(row[0]),
+                    group_label=row[1] or "Unknown",
+                    invoice_count=int(row[2]),
+                    total_billed=Decimal(str(row[3])),
+                    total_collected=Decimal(str(row[4])),
+                    outstanding=Decimal(str(row[5])),
+                )
+                for row in result.all()
+            ]
+
+        if group_by == CollectionReportGroupBy.DATE:
+            stmt = (
+                select(
+                    InvoiceModel.invoice_date,
+                    func.count(InvoiceModel.id),
+                    func.coalesce(func.sum(InvoiceModel.grand_total), 0),
+                    func.coalesce(func.sum(InvoiceModel.paid_amount), 0),
+                    func.coalesce(func.sum(InvoiceModel.balance), 0),
+                )
+                .where(base_filter)
+                .group_by(InvoiceModel.invoice_date)
+                .order_by(InvoiceModel.invoice_date)
+            )
+            result = await self._session.execute(stmt)
+            return [
+                CollectionReportRow(
+                    group_key=row[0].isoformat(),
+                    group_label=row[0].isoformat(),
+                    invoice_count=int(row[1]),
+                    total_billed=Decimal(str(row[2])),
+                    total_collected=Decimal(str(row[3])),
+                    outstanding=Decimal(str(row[4])),
+                )
+                for row in result.all()
+            ]
+
+        # group_by == USER
+        payment_date = func.date(PaymentModel.payment_date)
+        stmt = (
+            select(PaymentModel, InvoiceModel, UserModel)
+            .join(InvoiceModel, PaymentModel.invoice_id == InvoiceModel.id)
+            .outerjoin(UserModel, PaymentModel.collected_by == UserModel.id)
+            .where(
+                InvoiceModel.deleted_at.is_(None),
+                payment_date >= date_from,
+                payment_date <= date_to,
+            )
+        )
+        result = await self._session.execute(stmt)
+
+        buckets: dict[str, dict] = {}
+        for payment, invoice, user in result.all():
+            key = str(payment.collected_by) if payment.collected_by else "unassigned"
+            if key not in buckets:
+                buckets[key] = {
+                    "label": user.full_name if user else "Unassigned",
+                    "invoice_ids": set(),
+                    "invoices": {},
+                    "collected": Decimal("0"),
+                }
+            buckets[key]["collected"] += Decimal(str(payment.amount))
+            buckets[key]["invoice_ids"].add(invoice.id)
+            buckets[key]["invoices"][invoice.id] = invoice
+
+        rows: list[CollectionReportRow] = []
+        for key, bucket in sorted(buckets.items(), key=lambda item: item[1]["label"] or ""):
+            invoices = bucket["invoices"].values()
+            rows.append(
+                CollectionReportRow(
+                    group_key=key,
+                    group_label=bucket["label"],
+                    invoice_count=len(bucket["invoice_ids"]),
+                    total_billed=sum(
+                        (Decimal(str(inv.grand_total)) for inv in invoices), Decimal("0")
+                    ),
+                    total_collected=bucket["collected"],
+                    outstanding=sum(
+                        (Decimal(str(inv.balance)) for inv in invoices), Decimal("0")
+                    ),
+                )
+            )
+        return rows

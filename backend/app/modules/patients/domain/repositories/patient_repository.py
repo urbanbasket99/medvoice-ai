@@ -20,6 +20,9 @@ class PatientRepository(ABC):
     async def get_by_uhid(self, uhid: str) -> Patient | None: ...
 
     @abstractmethod
+    async def get_by_mrn(self, mrn: str) -> Patient | None: ...
+
+    @abstractmethod
     async def exists_by_mobile(self, mobile: str, exclude_id: UUID | None = None) -> bool: ...
 
     @abstractmethod

@@ -35,6 +35,14 @@ class LabStatus(StrEnum):
     CANCELLED = "cancelled"
 
 
+class ResultFlag(StrEnum):
+    NORMAL = "normal"
+    HIGH = "high"
+    LOW = "low"
+    CRITICAL = "critical"
+    ABNORMAL = "abnormal"
+
+
 class SortDirection(StrEnum):
     ASC = "asc"
     DESC = "desc"

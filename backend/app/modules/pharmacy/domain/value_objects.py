@@ -31,6 +31,25 @@ class DispenseStatus(StrEnum):
     CANCELLED = "cancelled"
 
 
+class DispenseType(StrEnum):
+    PRESCRIPTION = "prescription"
+    RETAIL = "retail"
+
+
+class VendorPaymentMethod(StrEnum):
+    CASH = "cash"
+    CHEQUE = "cheque"
+    BANK_TRANSFER = "bank_transfer"
+    UPI = "upi"
+    CARD = "card"
+    OTHER = "other"
+
+
+class StockReturnKind(StrEnum):
+    PURCHASE = "purchase"
+    SALES = "sales"
+
+
 class StockMovementType(StrEnum):
     PURCHASE = "purchase"
     DISPENSE = "dispense"
@@ -91,6 +110,7 @@ class DispenseListCriteria:
     patient_id: UUID | None = None
     doctor_id: UUID | None = None
     status: DispenseStatus | None = None
+    dispense_type: DispenseType | None = None
 
 
 @dataclass(frozen=True, slots=True)

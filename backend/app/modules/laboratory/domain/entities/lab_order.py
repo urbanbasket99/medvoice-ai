@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from uuid import UUID
 
-from app.modules.laboratory.domain.value_objects import LabPriority, LabStatus, SampleType
+from app.modules.laboratory.domain.value_objects import LabPriority, LabStatus, ResultFlag, SampleType
 
 
 @dataclass(slots=True)
@@ -26,6 +26,14 @@ class LabOrderItem:
     sort_order: int = 0
     lab_test_master_id: UUID | None = None
     instructions: str | None = None
+    result_value: str | None = None
+    result_unit: str | None = None
+    reference_range: str | None = None
+    result_flag: ResultFlag | None = None
+    result_notes: str | None = None
+    resulted_at: datetime | None = None
+    resulted_by: UUID | None = None
+    sample_barcode: str | None = None
 
 
 @dataclass(slots=True)
@@ -52,6 +60,7 @@ class LabOrder:
     doctor_code: str | None = None
     doctor_specialization: str | None = None
     consultation_visit_number: str | None = None
+    is_partial_report: bool = False
 
     @property
     def is_deleted(self) -> bool:

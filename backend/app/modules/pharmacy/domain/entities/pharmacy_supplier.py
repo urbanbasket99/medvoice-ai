@@ -13,3 +13,5 @@ class PharmacySupplier:
     phone: str | None = None
     email: str | None = None
     address: str | None = None
+    code: str | None = None
+    updated_at: datetime | None = None

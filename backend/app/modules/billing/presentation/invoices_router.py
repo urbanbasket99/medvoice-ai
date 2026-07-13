@@ -10,6 +10,7 @@ from app.modules.billing.domain.value_objects import (
     SortDirection,
 )
 from app.modules.billing.presentation.dependencies import (
+    CreateClaimUseCaseDep,
     CreateInvoiceUseCaseDep,
     DeleteInvoiceUseCaseDep,
     GetConsultationChargesUseCaseDep,
@@ -18,6 +19,7 @@ from app.modules.billing.presentation.dependencies import (
     GetInvoicesUseCaseDep,
     GetOutstandingInvoicesUseCaseDep,
     IssueInvoiceUseCaseDep,
+    ListClaimsByInvoiceUseCaseDep,
     RequireBillingCreate,
     RequireBillingDelete,
     RequireBillingRead,
@@ -26,7 +28,9 @@ from app.modules.billing.presentation.dependencies import (
     UpdateInvoiceUseCaseDep,
 )
 from app.modules.billing.presentation.schemas import (
+    ClaimCreateRequest,
     ConsultationChargesResponse,
+    InsuranceClaimResponse,
     InvoiceCreateRequest,
     InvoiceListResponse,
     InvoicePrintResponse,
@@ -155,3 +159,28 @@ async def delete_invoice(
     use_case: DeleteInvoiceUseCaseDep,
 ) -> None:
     await use_case.execute(invoice_id)
+
+
+@router.get("/{invoice_id}/claims", response_model=list[InsuranceClaimResponse])
+async def list_invoice_claims(
+    invoice_id: UUID,
+    _: RequireBillingRead,
+    use_case: ListClaimsByInvoiceUseCaseDep,
+) -> list[InsuranceClaimResponse]:
+    claims = await use_case.execute(invoice_id)
+    return [InsuranceClaimResponse.from_entity(c) for c in claims]
+
+
+@router.post(
+    "/{invoice_id}/claims",
+    response_model=InsuranceClaimResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_invoice_claim(
+    invoice_id: UUID,
+    payload: ClaimCreateRequest,
+    _: RequireBillingCreate,
+    use_case: CreateClaimUseCaseDep,
+) -> InsuranceClaimResponse:
+    claim = await use_case.execute(invoice_id, payload.to_input())
+    return InsuranceClaimResponse.from_entity(claim)

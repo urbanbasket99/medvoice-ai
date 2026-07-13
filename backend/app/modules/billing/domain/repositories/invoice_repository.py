@@ -1,8 +1,15 @@
 from abc import ABC, abstractmethod
+from datetime import date
 from uuid import UUID
 
 from app.modules.billing.domain.entities.billing_entities import Invoice
-from app.modules.billing.domain.value_objects import InvoiceListCriteria, InvoicePage, InvoiceStatus
+from app.modules.billing.domain.value_objects import (
+    CollectionReportGroupBy,
+    CollectionReportRow,
+    InvoiceListCriteria,
+    InvoicePage,
+    InvoiceStatus,
+)
 
 
 class InvoiceRepository(ABC):
@@ -41,4 +48,13 @@ class InvoiceRepository(ABC):
 
     @abstractmethod
     async def list_outstanding(self, page: int, page_size: int) -> InvoicePage:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_collection_report(
+        self,
+        date_from: date,
+        date_to: date,
+        group_by: CollectionReportGroupBy,
+    ) -> list[CollectionReportRow]:
         raise NotImplementedError

@@ -15,6 +15,10 @@ class PharmacyMedicineRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_by_barcode(self, barcode: str) -> PharmacyMedicine | None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def create(self, medicine: PharmacyMedicine) -> PharmacyMedicine:
         raise NotImplementedError
 

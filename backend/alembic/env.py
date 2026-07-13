@@ -26,7 +26,44 @@ from app.infrastructure.models import (  # noqa: F401
     user_roles,
 )
 from app.modules.patients.infrastructure.models import PatientModel  # noqa: F401
-
+from app.modules.doctors.infrastructure.models.doctor_model import DoctorModel  # noqa: F401
+from app.modules.doctors.infrastructure.models.doctor_availability_slot_model import (  # noqa: F401
+    DoctorAvailabilitySlotModel,
+)
+from app.modules.billing.infrastructure.models.billing_model import (  # noqa: F401
+    InsuranceClaimModel,
+    InvoiceItemModel,
+    InvoiceModel,
+    InvoiceStatusEventModel,
+    PaymentModel,
+    TpaModel,
+)
+from app.modules.certificates.infrastructure.models.medical_certificate_model import (  # noqa: F401
+    MedicalCertificateModel,
+)
+from app.modules.accounts.infrastructure.models.accounts_model import (  # noqa: F401
+    AccountVendorModel,
+    ChartOfAccountModel,
+    ExpenseVoucherModel,
+    IncomeVoucherModel,
+    JournalEntryModel,
+    JournalLineModel,
+    VendorBillModel,
+    VendorPaymentModel,
+)
+from app.modules.ipd.infrastructure.models.ipd_model import (  # noqa: F401
+    IpdAdmissionModel,
+    IpdBedModel,
+    IpdChargeModel,
+    IpdMlcCaseModel,
+    IpdNursingNoteModel,
+    IpdOtScheduleModel,
+    IpdWardModel,
+)
+from app.modules.laboratory.infrastructure.models.lab_order_model import (  # noqa: F401
+    LabOrderItemModel,
+    LabOrderModel,
+)
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

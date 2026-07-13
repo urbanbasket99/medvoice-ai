@@ -48,6 +48,7 @@ class LabOrderModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_partial_report: Mapped[bool] = mapped_column(nullable=False, server_default="false")
 
     items: Mapped[list["LabOrderItemModel"]] = relationship(
         "LabOrderItemModel",
@@ -78,6 +79,16 @@ class LabOrderItemModel(Base):
     sample_type: Mapped[str] = mapped_column(String(20), nullable=False)
     instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(nullable=False, server_default="0")
+    result_value: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    result_unit: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    reference_range: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    result_flag: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    result_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resulted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    resulted_by: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    sample_barcode: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
     lab_order: Mapped[LabOrderModel] = relationship("LabOrderModel", back_populates="items")
 

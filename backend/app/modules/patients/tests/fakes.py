@@ -27,6 +27,12 @@ class FakePatientRepository(PatientRepository):
                 return patient
         return None
 
+    async def get_by_mrn(self, mrn: str) -> Patient | None:
+        for patient in self._patients.values():
+            if patient.mrn == mrn and not patient.is_deleted:
+                return patient
+        return None
+
     async def exists_by_mobile(self, mobile: str, exclude_id: UUID | None = None) -> bool:
         return any(
             patient.mobile == mobile and not patient.is_deleted and patient.id != exclude_id

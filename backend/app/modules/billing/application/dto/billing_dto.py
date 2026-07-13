@@ -3,7 +3,11 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from app.modules.billing.domain.value_objects import BillingDepartment, PaymentMethod, ReferenceType
+from app.modules.billing.domain.value_objects import (
+    BillingDepartment,
+    PaymentMethod,
+    ReferenceType,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +39,9 @@ class CreateInvoiceInput:
     items: tuple[InvoiceItemInput, ...]
     discount_amount: Decimal
     tax_amount: Decimal
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +51,9 @@ class UpdateInvoiceInput:
     items: tuple[InvoiceItemInput, ...]
     discount_amount: Decimal
     tax_amount: Decimal
+    is_provisional: bool = False
+    is_tpa: bool = False
+    tpa_id: UUID | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,3 +136,47 @@ class InvoiceItemSuggestion:
     unit_price: Decimal
     reference_type: ReferenceType | None
     reference_id: UUID | None
+
+
+@dataclass(frozen=True, slots=True)
+class CreateTpaInput:
+    code: str
+    name: str
+    contact_person: str | None
+    phone: str | None
+    email: str | None
+    address: str | None
+    is_active: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class UpdateTpaInput:
+    code: str
+    name: str
+    contact_person: str | None
+    phone: str | None
+    email: str | None
+    address: str | None
+    is_active: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class CreateClaimInput:
+    claim_number: str | None
+    insurer_name: str | None
+    status: str
+    claimed_amount: Decimal | None
+    approved_amount: Decimal | None
+    notes: str | None
+    tpa_id: UUID | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class UpdateClaimInput:
+    claim_number: str | None
+    insurer_name: str | None
+    status: str
+    claimed_amount: Decimal | None
+    approved_amount: Decimal | None
+    notes: str | None
+    tpa_id: UUID | None = None

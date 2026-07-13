@@ -7,6 +7,7 @@ from app.modules.pharmacy.domain.value_objects import (
     DispenseListCriteria,
     DispenseSortField,
     DispenseStatus,
+    DispenseType,
     SortDirection,
 )
 from app.modules.pharmacy.presentation.dependencies import (
@@ -49,6 +50,7 @@ async def list_dispenses(
     patient_id: UUID | None = None,
     doctor_id: UUID | None = None,
     status: DispenseStatus | None = None,
+    dispense_type: DispenseType | None = None,
 ) -> DispenseListResponse:
     criteria = DispenseListCriteria(
         page=page,
@@ -60,6 +62,7 @@ async def list_dispenses(
         patient_id=patient_id,
         doctor_id=doctor_id,
         status=status,
+        dispense_type=dispense_type,
     )
     result = await use_case.execute(criteria)
     return DispenseListResponse.from_page(result)

@@ -9,12 +9,16 @@ from app.modules.pharmacy.application.dto.pharmacy_dto import (
     CreateBatchInput,
     CreateDispenseInput,
     CreateMedicineInput,
+    CreateSupplierInput,
+    CreateVendorPaymentInput,
     DispenseItemInput,
     DispensePrintOutput,
+    StockReturnInput,
     UpdateBatchInput,
     UpdateDispenseInput,
     UpdateDispenseStatusInput,
     UpdateMedicineInput,
+    UpdateSupplierInput,
 )
 from app.modules.pharmacy.domain.entities.dispense_record import (
     DispenseItem,
@@ -25,15 +29,19 @@ from app.modules.pharmacy.domain.entities.pharmacy_batch import PharmacyBatch
 from app.modules.pharmacy.domain.entities.pharmacy_medicine import PharmacyMedicine
 from app.modules.pharmacy.domain.entities.pharmacy_medicine_stock import PharmacyMedicineStock
 from app.modules.pharmacy.domain.entities.pharmacy_supplier import PharmacySupplier
+from app.modules.pharmacy.domain.entities.vendor_payment import VendorPayment
 from app.modules.pharmacy.domain.entities.stock_movement import StockMovement
 from app.modules.pharmacy.domain.value_objects import (
     DispensePage,
     DispenseStatus,
+    DispenseType,
     InventoryPage,
     MedicineCategory,
     MedicinePage,
     StockMovementPage,
     StockMovementType,
+    StockReturnKind,
+    VendorPaymentMethod,
 )
 
 
@@ -364,6 +372,8 @@ class SupplierResponse(BaseModel):
     name: str
     is_active: bool
     created_at: datetime
+    code: str | None = None
+    updated_at: datetime | None = None
     contact_person: str | None = None
     phone: str | None = None
     email: str | None = None
@@ -376,10 +386,130 @@ class SupplierResponse(BaseModel):
             name=supplier.name,
             is_active=supplier.is_active,
             created_at=supplier.created_at,
+            code=supplier.code,
+            updated_at=supplier.updated_at,
             contact_person=supplier.contact_person,
             phone=supplier.phone,
             email=supplier.email,
             address=supplier.address,
+        )
+
+
+class SupplierCreateRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    code: str | None = Field(default=None, max_length=30)
+    contact_person: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=100)
+    address: str | None = None
+    is_active: bool = True
+
+    def to_input(self) -> CreateSupplierInput:
+        return CreateSupplierInput(
+            name=self.name,
+            code=self.code,
+            contact_person=self.contact_person,
+            phone=self.phone,
+            email=self.email,
+            address=self.address,
+            is_active=self.is_active,
+        )
+
+
+class SupplierUpdateRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    code: str | None = Field(default=None, max_length=30)
+    contact_person: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=100)
+    address: str | None = None
+    is_active: bool = True
+
+    def to_input(self) -> UpdateSupplierInput:
+        return UpdateSupplierInput(
+            name=self.name,
+            code=self.code,
+            contact_person=self.contact_person,
+            phone=self.phone,
+            email=self.email,
+            address=self.address,
+            is_active=self.is_active,
+        )
+
+
+class SupplierListResponse(BaseModel):
+    items: list[SupplierResponse]
+
+
+class VendorPaymentCreateRequest(BaseModel):
+    supplier_id: UUID
+    amount: Decimal = Field(gt=0)
+    payment_date: date
+    payment_method: VendorPaymentMethod = VendorPaymentMethod.CASH
+    reference_number: str | None = Field(default=None, max_length=100)
+    notes: str | None = Field(default=None, max_length=2000)
+
+    def to_input(self, created_by: UUID | None = None) -> CreateVendorPaymentInput:
+        return CreateVendorPaymentInput(
+            supplier_id=self.supplier_id,
+            amount=self.amount,
+            payment_date=self.payment_date,
+            payment_method=self.payment_method,
+            reference_number=self.reference_number,
+            notes=self.notes,
+            created_by=created_by,
+        )
+
+
+class VendorPaymentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    payment_number: str
+    supplier_id: UUID
+    amount: Decimal
+    payment_date: date
+    payment_method: VendorPaymentMethod
+    created_at: datetime
+    supplier_name: str | None = None
+    reference_number: str | None = None
+    notes: str | None = None
+    created_by: UUID | None = None
+
+    @classmethod
+    def from_entity(cls, payment: VendorPayment) -> "VendorPaymentResponse":
+        return cls(
+            id=payment.id,
+            payment_number=payment.payment_number,
+            supplier_id=payment.supplier_id,
+            amount=payment.amount,
+            payment_date=payment.payment_date,
+            payment_method=payment.payment_method,
+            created_at=payment.created_at,
+            supplier_name=payment.supplier_name,
+            reference_number=payment.reference_number,
+            notes=payment.notes,
+            created_by=payment.created_by,
+        )
+
+
+class VendorPaymentListResponse(BaseModel):
+    items: list[VendorPaymentResponse]
+
+
+class StockReturnRequest(BaseModel):
+    medicine_id: UUID
+    quantity: int = Field(ge=1)
+    batch_id: UUID | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+
+    def to_input(self, return_kind: StockReturnKind) -> StockReturnInput:
+        return StockReturnInput(
+            medicine_id=self.medicine_id,
+            quantity=self.quantity,
+            return_kind=return_kind,
+            batch_id=self.batch_id,
+            notes=self.notes,
         )
 
 
@@ -407,14 +537,22 @@ class DispenseItemRequest(BaseModel):
 
 
 class DispenseCreateRequest(BaseModel):
-    prescription_id: UUID
+    patient_id: UUID | None = None
+    prescription_id: UUID | None = None
+    dispense_type: DispenseType = DispenseType.PRESCRIPTION
     status: DispenseStatus = DispenseStatus.PENDING
     notes: str | None = Field(default=None, max_length=4000)
     dispensed_by: UUID | None = None
     items: list[DispenseItemRequest] | None = None
 
     def to_input(self) -> CreateDispenseInput:
+        if self.dispense_type == DispenseType.RETAIL and self.patient_id is None:
+            raise ValueError("patient_id is required for retail dispense.")
+        if self.dispense_type == DispenseType.PRESCRIPTION and self.prescription_id is None:
+            raise ValueError("prescription_id is required for prescription dispense.")
         return CreateDispenseInput(
+            patient_id=self.patient_id,
+            dispense_type=self.dispense_type,
             prescription_id=self.prescription_id,
             status=self.status,
             notes=self.notes,
@@ -501,14 +639,15 @@ class DispenseResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    prescription_id: UUID
-    consultation_id: UUID
     patient_id: UUID
-    doctor_id: UUID
     order_number: str
     status: DispenseStatus
     created_at: datetime
     updated_at: datetime
+    dispense_type: DispenseType = DispenseType.PRESCRIPTION
+    prescription_id: UUID | None = None
+    consultation_id: UUID | None = None
+    doctor_id: UUID | None = None
     dispensed_by: UUID | None = None
     notes: str | None = None
     dispensed_at: datetime | None = None
@@ -524,6 +663,7 @@ class DispenseResponse(BaseModel):
     def from_entity(cls, dispense: DispenseRecord) -> "DispenseResponse":
         return cls(
             id=dispense.id,
+            dispense_type=dispense.dispense_type,
             prescription_id=dispense.prescription_id,
             consultation_id=dispense.consultation_id,
             patient_id=dispense.patient_id,

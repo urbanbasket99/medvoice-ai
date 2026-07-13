@@ -31,3 +31,7 @@ class DispenseInvalidStatusTransitionError(DomainError):
 
 class PharmacySupplierNotFoundError(DomainError):
     pass
+
+
+class PharmacySupplierCodeAlreadyExistsError(DomainError):
+    pass

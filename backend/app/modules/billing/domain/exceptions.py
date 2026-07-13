@@ -19,3 +19,15 @@ class InvalidInvoiceStatusError(DomainError):
 
 class PaymentExceedsBalanceError(DomainError):
     pass
+
+
+class TpaNotFoundError(DomainError):
+    pass
+
+
+class TpaCodeAlreadyExistsError(DomainError):
+    pass
+
+
+class InsuranceClaimNotFoundError(DomainError):
+    pass

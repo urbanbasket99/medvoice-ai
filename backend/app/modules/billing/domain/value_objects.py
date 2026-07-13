@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import StrEnum
 from math import ceil
 from typing import TYPE_CHECKING
@@ -8,6 +9,22 @@ from uuid import UUID
 
 if TYPE_CHECKING:
     from app.modules.billing.domain.entities.billing_entities import Invoice
+
+
+class CollectionReportGroupBy(StrEnum):
+    DOCTOR = "doctor"
+    DATE = "date"
+    USER = "user"
+
+
+@dataclass(frozen=True, slots=True)
+class CollectionReportRow:
+    group_key: str
+    group_label: str
+    invoice_count: int
+    total_billed: Decimal
+    total_collected: Decimal
+    outstanding: Decimal
 
 
 class InvoiceStatus(StrEnum):
@@ -33,6 +50,7 @@ class BillingDepartment(StrEnum):
     RADIOLOGY = "radiology"
     PHARMACY = "pharmacy"
     PRESCRIPTION = "prescription"
+    IPD = "ipd"
     OTHER = "other"
 
 
@@ -41,6 +59,7 @@ class ReferenceType(StrEnum):
     RADIOLOGY_ORDER = "radiology_order"
     DISPENSE_RECORD = "dispense_record"
     PRESCRIPTION = "prescription"
+    IPD_CHARGE = "ipd_charge"
     MANUAL = "manual"
 
 

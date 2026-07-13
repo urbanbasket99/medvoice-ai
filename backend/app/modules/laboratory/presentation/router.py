@@ -15,6 +15,7 @@ from app.modules.laboratory.presentation.dependencies import (
     GetLabOrderPrintUseCaseDep,
     GetLabOrderUseCaseDep,
     GetLabOrdersUseCaseDep,
+    GetLabResultsPrintUseCaseDep,
     RequireLaboratoryCreate,
     RequireLaboratoryDelete,
     RequireLaboratoryRead,
@@ -22,6 +23,8 @@ from app.modules.laboratory.presentation.dependencies import (
     SearchLabOrdersUseCaseDep,
     UpdateLabOrderStatusUseCaseDep,
     UpdateLabOrderUseCaseDep,
+    UpdateLabResultsUseCaseDep,
+    SendLabResultsEmailUseCaseDep,
 )
 from app.modules.laboratory.presentation.schemas import (
     LabOrderCreateRequest,
@@ -30,6 +33,10 @@ from app.modules.laboratory.presentation.schemas import (
     LabOrderResponse,
     LabOrderStatusUpdateRequest,
     LabOrderUpdateRequest,
+    LabResultsEmailRequest,
+    LabResultsPrintResponse,
+    LabResultsUpdateRequest,
+    ReportEmailDeliveryResponse,
 )
 
 router = APIRouter(prefix="/lab-orders", tags=["laboratory"])
@@ -84,6 +91,16 @@ async def print_lab_order(
     return LabOrderPrintResponse.from_output(output)
 
 
+@router.get("/{lab_order_id}/results/print", response_model=LabResultsPrintResponse)
+async def print_lab_results(
+    lab_order_id: UUID,
+    _: RequireLaboratoryRead,
+    use_case: GetLabResultsPrintUseCaseDep,
+) -> LabResultsPrintResponse:
+    output = await use_case.execute(lab_order_id)
+    return LabResultsPrintResponse.from_output(output)
+
+
 @router.get("/{lab_order_id}", response_model=LabOrderResponse)
 async def get_lab_order(
     lab_order_id: UUID,
@@ -124,6 +141,38 @@ async def update_lab_order_status(
 ) -> LabOrderResponse:
     lab_order = await use_case.execute(lab_order_id, payload.to_input())
     return LabOrderResponse.from_entity(lab_order)
+
+
+@router.patch("/{lab_order_id}/results", response_model=LabOrderResponse)
+async def update_lab_results(
+    lab_order_id: UUID,
+    payload: LabResultsUpdateRequest,
+    current_user: RequireLaboratoryUpdate,
+    use_case: UpdateLabResultsUseCaseDep,
+) -> LabOrderResponse:
+    lab_order = await use_case.execute(lab_order_id, payload.to_input(), resulted_by=current_user.id)
+    return LabOrderResponse.from_entity(lab_order)
+
+
+@router.post("/{lab_order_id}/results/email", response_model=ReportEmailDeliveryResponse)
+async def email_lab_results(
+    lab_order_id: UUID,
+    payload: LabResultsEmailRequest,
+    current_user: RequireLaboratoryUpdate,
+    use_case: SendLabResultsEmailUseCaseDep,
+) -> ReportEmailDeliveryResponse:
+    delivery = await use_case.execute(lab_order_id, payload.to_input(), created_by=current_user.id)
+    return ReportEmailDeliveryResponse(
+        id=delivery.id,
+        resource_type=delivery.resource_type,
+        resource_id=delivery.resource_id,
+        recipient_email=delivery.recipient_email,
+        recipient_role=delivery.recipient_role,
+        subject=delivery.subject,
+        status=delivery.status,
+        sent_at=delivery.sent_at,
+        created_at=delivery.created_at,
+    )
 
 
 @router.delete("/{lab_order_id}", status_code=status.HTTP_204_NO_CONTENT)

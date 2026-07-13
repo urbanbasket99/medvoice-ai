@@ -10,11 +10,14 @@ from app.modules.pharmacy.domain.entities.pharmacy_batch import PharmacyBatch
 from app.modules.pharmacy.domain.entities.pharmacy_medicine import PharmacyMedicine
 from app.modules.pharmacy.domain.entities.pharmacy_medicine_stock import PharmacyMedicineStock
 from app.modules.pharmacy.domain.entities.pharmacy_supplier import PharmacySupplier
+from app.modules.pharmacy.domain.entities.vendor_payment import VendorPayment
 from app.modules.pharmacy.domain.entities.stock_movement import StockMovement
 from app.modules.pharmacy.domain.value_objects import (
     DispenseStatus,
+    DispenseType,
     MedicineCategory,
     StockMovementType,
+    VendorPaymentMethod,
 )
 from app.modules.pharmacy.infrastructure.models.pharmacy_model import (
     DispenseItemModel,
@@ -25,6 +28,7 @@ from app.modules.pharmacy.infrastructure.models.pharmacy_model import (
     PharmacyMedicineStockModel,
     PharmacySupplierModel,
     StockMovementModel,
+    VendorPaymentModel,
 )
 
 
@@ -64,6 +68,8 @@ def pharmacy_supplier_to_entity(model: PharmacySupplierModel) -> PharmacySupplie
         phone=model.phone,
         email=model.email,
         address=model.address,
+        code=model.code,
+        updated_at=model.updated_at,
     )
 
 
@@ -191,6 +197,7 @@ def dispense_record_to_entity(
 ) -> DispenseRecord:
     return DispenseRecord(
         id=model.id,
+        dispense_type=DispenseType(model.dispense_type),
         prescription_id=model.prescription_id,
         consultation_id=model.consultation_id,
         patient_id=model.patient_id,
@@ -210,4 +217,23 @@ def dispense_record_to_entity(
         doctor_name=doctor.full_name if doctor else None,
         doctor_code=doctor.doctor_code if doctor else None,
         consultation_visit_number=consultation.visit_number if consultation else None,
+    )
+
+
+def vendor_payment_to_entity(
+    model: VendorPaymentModel,
+    supplier: PharmacySupplierModel | None = None,
+) -> VendorPayment:
+    return VendorPayment(
+        id=model.id,
+        payment_number=model.payment_number,
+        supplier_id=model.supplier_id,
+        amount=model.amount,
+        payment_date=model.payment_date,
+        payment_method=VendorPaymentMethod(model.payment_method),
+        created_at=model.created_at,
+        reference_number=model.reference_number,
+        notes=model.notes,
+        created_by=model.created_by,
+        supplier_name=supplier.name if supplier else None,
     )

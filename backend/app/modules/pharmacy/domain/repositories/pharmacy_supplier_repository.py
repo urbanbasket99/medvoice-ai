@@ -12,3 +12,15 @@ class PharmacySupplierRepository(ABC):
     @abstractmethod
     async def get_by_id(self, supplier_id: UUID) -> PharmacySupplier | None:
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_code(self, code: str) -> PharmacySupplier | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create(self, supplier: PharmacySupplier) -> PharmacySupplier:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update(self, supplier: PharmacySupplier) -> PharmacySupplier:
+        raise NotImplementedError

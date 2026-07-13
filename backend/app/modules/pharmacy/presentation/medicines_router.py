@@ -7,6 +7,7 @@ from app.modules.pharmacy.domain.value_objects import MedicineCategory, Medicine
 from app.modules.pharmacy.presentation.dependencies import (
     CreateMedicineUseCaseDep,
     DeleteMedicineUseCaseDep,
+    GetMedicineByBarcodeUseCaseDep,
     GetMedicineUseCaseDep,
     GetMedicinesUseCaseDep,
     RequirePharmacyCreate,
@@ -59,6 +60,16 @@ async def search_medicines(
 ) -> MedicineListResponse:
     result = await use_case.execute(q, page, page_size)
     return MedicineListResponse.from_page(result)
+
+
+@router.get("/by-barcode/{barcode}", response_model=MedicineResponse)
+async def get_medicine_by_barcode(
+    barcode: str,
+    _: RequirePharmacyRead,
+    use_case: GetMedicineByBarcodeUseCaseDep,
+) -> MedicineResponse:
+    medicine = await use_case.execute(barcode)
+    return MedicineResponse.from_entity(medicine)
 
 
 @router.get("/{medicine_id}", response_model=MedicineResponse)

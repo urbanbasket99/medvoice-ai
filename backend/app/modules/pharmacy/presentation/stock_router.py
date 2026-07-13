@@ -12,7 +12,9 @@ from app.modules.pharmacy.presentation.dependencies import (
     GetStockHistoryUseCaseDep,
     RequirePharmacyRead,
     RequirePharmacyUpdate,
+    ReturnStockUseCaseDep,
 )
+from app.modules.pharmacy.domain.value_objects import StockReturnKind
 from app.modules.pharmacy.presentation.schemas import (
     AdjustStockRequest,
     AdjustStockResponse,
@@ -20,6 +22,7 @@ from app.modules.pharmacy.presentation.schemas import (
     StockMovementListResponse,
     StockMovementResponse,
     StockResponse,
+    StockReturnRequest,
 )
 
 router = APIRouter(prefix="/pharmacy/stock", tags=["pharmacy"])
@@ -87,3 +90,33 @@ async def get_stock_history(
     )
     result = await use_case.execute(criteria)
     return StockMovementListResponse.from_page(result)
+
+
+@router.post("/returns/purchase", response_model=AdjustStockResponse)
+async def purchase_return(
+    payload: StockReturnRequest,
+    user: RequirePharmacyUpdate,
+    use_case: ReturnStockUseCaseDep,
+) -> AdjustStockResponse:
+    stock, movement = await use_case.execute(
+        payload.to_input(StockReturnKind.PURCHASE), created_by=user.id
+    )
+    return AdjustStockResponse(
+        stock=StockResponse.from_entity(stock),
+        movement=StockMovementResponse.from_entity(movement),
+    )
+
+
+@router.post("/returns/sales", response_model=AdjustStockResponse)
+async def sales_return(
+    payload: StockReturnRequest,
+    user: RequirePharmacyUpdate,
+    use_case: ReturnStockUseCaseDep,
+) -> AdjustStockResponse:
+    stock, movement = await use_case.execute(
+        payload.to_input(StockReturnKind.SALES), created_by=user.id
+    )
+    return AdjustStockResponse(
+        stock=StockResponse.from_entity(stock),
+        movement=StockMovementResponse.from_entity(movement),
+    )

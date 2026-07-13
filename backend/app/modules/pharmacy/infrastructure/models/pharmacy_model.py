@@ -13,6 +13,7 @@ class PharmacySupplierModel(Base):
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    code: Mapped[str | None] = mapped_column(String(30), nullable=True, unique=True, index=True)
     contact_person: Mapped[str | None] = mapped_column(String(100), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     email: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -20,6 +21,9 @@ class PharmacySupplierModel(Base):
     is_active: Mapped[bool] = mapped_column(nullable=False, server_default="true")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
 
@@ -104,17 +108,18 @@ class DispenseRecordModel(Base):
     __tablename__ = "dispense_records"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
-    prescription_id: Mapped[UUID] = mapped_column(
-        Uuid, ForeignKey("prescriptions.id", ondelete="RESTRICT"), nullable=False, index=True
+    dispense_type: Mapped[str] = mapped_column(String(20), nullable=False, server_default="prescription")
+    prescription_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("prescriptions.id", ondelete="RESTRICT"), nullable=True, index=True
     )
-    consultation_id: Mapped[UUID] = mapped_column(
-        Uuid, ForeignKey("consultations.id", ondelete="RESTRICT"), nullable=False, index=True
+    consultation_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("consultations.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     patient_id: Mapped[UUID] = mapped_column(
         Uuid, ForeignKey("patients.id", ondelete="RESTRICT"), nullable=False, index=True
     )
-    doctor_id: Mapped[UUID] = mapped_column(
-        Uuid, ForeignKey("doctors.id", ondelete="RESTRICT"), nullable=False, index=True
+    doctor_id: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("doctors.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     dispensed_by: Mapped[UUID | None] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
@@ -210,3 +215,26 @@ class StockMovementModel(Base):
 
     medicine: Mapped[PharmacyMedicineModel] = relationship("PharmacyMedicineModel")
     batch: Mapped[PharmacyBatchModel | None] = relationship("PharmacyBatchModel")
+
+
+class VendorPaymentModel(Base):
+    __tablename__ = "pharmacy_vendor_payments"
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    payment_number: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
+    supplier_id: Mapped[UUID] = mapped_column(
+        Uuid, ForeignKey("pharmacy_suppliers.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    payment_date: Mapped[date] = mapped_column(Date, nullable=False)
+    payment_method: Mapped[str] = mapped_column(String(30), nullable=False, server_default="cash")
+    reference_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    supplier: Mapped[PharmacySupplierModel] = relationship("PharmacySupplierModel")

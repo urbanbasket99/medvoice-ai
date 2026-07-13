@@ -94,6 +94,8 @@ class SqlAlchemyLabOrderRepository(LabOrderRepository):
             .values(
                 priority=lab_order.priority.value,
                 clinical_notes=lab_order.clinical_notes,
+                is_partial_report=lab_order.is_partial_report,
+                updated_at=lab_order.updated_at,
             )
         )
         await self._session.execute(

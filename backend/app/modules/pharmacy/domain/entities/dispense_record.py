@@ -3,7 +3,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from app.modules.pharmacy.domain.value_objects import DispenseStatus
+from app.modules.pharmacy.domain.value_objects import DispenseStatus, DispenseType
 
 
 @dataclass(slots=True)
@@ -32,14 +32,15 @@ class DispenseStatusEvent:
 @dataclass(slots=True)
 class DispenseRecord:
     id: UUID
-    prescription_id: UUID
-    consultation_id: UUID
     patient_id: UUID
-    doctor_id: UUID
     order_number: str
     status: DispenseStatus
     created_at: datetime
     updated_at: datetime
+    dispense_type: DispenseType = DispenseType.PRESCRIPTION
+    prescription_id: UUID | None = None
+    consultation_id: UUID | None = None
+    doctor_id: UUID | None = None
     dispensed_by: UUID | None = None
     notes: str | None = None
     dispensed_at: datetime | None = None

@@ -11,11 +11,14 @@ from app.modules.laboratory.application.use_cases.delete_lab_order import Delete
 from app.modules.laboratory.application.use_cases.get_lab_order import GetLabOrderUseCase
 from app.modules.laboratory.application.use_cases.get_lab_order_print import GetLabOrderPrintUseCase
 from app.modules.laboratory.application.use_cases.get_lab_orders import GetLabOrdersUseCase
+from app.modules.laboratory.application.use_cases.get_lab_results_print import GetLabResultsPrintUseCase
 from app.modules.laboratory.application.use_cases.get_lab_tests import GetLabTestsUseCase
 from app.modules.laboratory.application.use_cases.search_lab_orders import SearchLabOrdersUseCase
 from app.modules.laboratory.application.use_cases.search_lab_tests import SearchLabTestsUseCase
+from app.modules.laboratory.application.use_cases.send_lab_results_email import SendLabResultsEmailUseCase
 from app.modules.laboratory.application.use_cases.update_lab_order import UpdateLabOrderUseCase
 from app.modules.laboratory.application.use_cases.update_lab_order_status import UpdateLabOrderStatusUseCase
+from app.modules.laboratory.application.use_cases.update_lab_results import UpdateLabResultsUseCase
 from app.modules.laboratory.domain.repositories.lab_order_repository import LabOrderRepository
 from app.modules.laboratory.domain.repositories.lab_test_master_repository import LabTestMasterRepository
 from app.modules.laboratory.infrastructure.lab_order_number_generator import SqlAlchemyLabOrderNumberGenerator
@@ -112,6 +115,25 @@ def provide_get_lab_order_print_use_case(
     return GetLabOrderPrintUseCase(lab_order_repository)
 
 
+def provide_update_lab_results_use_case(
+    lab_order_repository: LabOrderRepositoryDep,
+) -> UpdateLabResultsUseCase:
+    return UpdateLabResultsUseCase(lab_order_repository)
+
+
+def provide_get_lab_results_print_use_case(
+    lab_order_repository: LabOrderRepositoryDep,
+) -> GetLabResultsPrintUseCase:
+    return GetLabResultsPrintUseCase(lab_order_repository)
+
+
+def provide_send_lab_results_email_use_case(
+    lab_order_repository: LabOrderRepositoryDep,
+    db: DbSession,
+) -> SendLabResultsEmailUseCase:
+    return SendLabResultsEmailUseCase(lab_order_repository, db)
+
+
 CreateLabOrderUseCaseDep = Annotated[CreateLabOrderUseCase, Depends(provide_create_lab_order_use_case)]
 UpdateLabOrderUseCaseDep = Annotated[UpdateLabOrderUseCase, Depends(provide_update_lab_order_use_case)]
 UpdateLabOrderStatusUseCaseDep = Annotated[
@@ -124,6 +146,13 @@ SearchLabOrdersUseCaseDep = Annotated[SearchLabOrdersUseCase, Depends(provide_se
 SearchLabTestsUseCaseDep = Annotated[SearchLabTestsUseCase, Depends(provide_search_lab_tests_use_case)]
 GetLabTestsUseCaseDep = Annotated[GetLabTestsUseCase, Depends(provide_get_lab_tests_use_case)]
 GetLabOrderPrintUseCaseDep = Annotated[GetLabOrderPrintUseCase, Depends(provide_get_lab_order_print_use_case)]
+UpdateLabResultsUseCaseDep = Annotated[UpdateLabResultsUseCase, Depends(provide_update_lab_results_use_case)]
+GetLabResultsPrintUseCaseDep = Annotated[
+    GetLabResultsPrintUseCase, Depends(provide_get_lab_results_print_use_case)
+]
+SendLabResultsEmailUseCaseDep = Annotated[
+    SendLabResultsEmailUseCase, Depends(provide_send_lab_results_email_use_case)
+]
 
 RequireLaboratoryRead = Annotated[User, Depends(require_permission("laboratory:read"))]
 RequireLaboratoryCreate = Annotated[User, Depends(require_permission("laboratory:create"))]

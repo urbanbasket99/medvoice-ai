@@ -1,0 +1,30 @@
+# Python cache & virtualenvs
+__pycache__
+*.py[cod]
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.venv
+venv
+env
+
+# Local secrets
+.env
+.env.*
+
+# Runtime storage (mounted as volume in production)
+storage/
+
+# Git & editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Tests & docs
+tests
+*.md
+
+# Alembic bytecode
+alembic/versions/__pycache__
