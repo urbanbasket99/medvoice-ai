@@ -25,6 +25,7 @@ export interface PatientTableProps {
   onDeactivate: (patient: Patient) => void;
   canUpdate: boolean;
   canDelete: boolean;
+
 }
 
 const GENDER_LABEL: Record<Gender, string> = { male: "Male", female: "Female", other: "Other" };

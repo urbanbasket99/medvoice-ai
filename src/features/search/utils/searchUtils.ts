@@ -19,5 +19,5 @@ export const highlightMatch = (text: string, query: string): string => {
   return text.replace(new RegExp(`(${escaped})`, "ig"), "<mark>$1</mark>");
 };
 
-export const getDisplayText = (result: { title: string; highlight: string | null }, query: string) =>
+export const getDisplayText = (result: { title: string; highlight: string | null }, _query: string) =>
   result.highlight ?? result.title;

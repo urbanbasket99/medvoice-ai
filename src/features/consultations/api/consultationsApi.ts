@@ -19,31 +19,37 @@ import type {
 const normalizeTime = (value: string | null): string | null =>
   value ? (value.length >= 5 ? value.slice(0, 5) : value) : null;
 
-const toVitalSigns = (response: VitalSignsApiResponse | null): VitalSigns | null => {
+const toVitalSigns = (
+  response: VitalSignsApiResponse | null
+): VitalSigns | null => {
   if (!response) return null;
+
   return {
-    bloodPressureSystolic: response.blood_pressure_systolic,
-    bloodPressureDiastolic: response.blood_pressure_diastolic,
-    pulse: response.pulse,
-    temperature: response.temperature,
-    spo2: response.spo2,
-    respiratoryRate: response.respiratory_rate,
-    weightKg: response.weight_kg,
-    heightCm: response.height_cm,
+    bloodPressureSystolic: response.blood_pressure_systolic ?? undefined,
+    bloodPressureDiastolic: response.blood_pressure_diastolic ?? undefined,
+    pulse: response.pulse ?? undefined,
+    temperature: response.temperature ?? undefined,
+    spo2: response.spo2 ?? undefined,
+    respiratoryRate: response.respiratory_rate ?? undefined,
+    weightKg: response.weight_kg ?? undefined,
+    heightCm: response.height_cm ?? undefined,
   };
 };
 
-const toVitalSignsBody = (vitalSigns: VitalSigns | null | undefined): VitalSignsApiResponse | null => {
+const toVitalSignsBody = (
+  vitalSigns: VitalSigns | null | undefined
+): VitalSignsApiResponse | null => {
   if (!vitalSigns) return null;
+
   return {
-    blood_pressure_systolic: vitalSigns.bloodPressureSystolic,
-    blood_pressure_diastolic: vitalSigns.bloodPressureDiastolic,
-    pulse: vitalSigns.pulse,
-    temperature: vitalSigns.temperature,
-    spo2: vitalSigns.spo2,
-    respiratory_rate: vitalSigns.respiratoryRate,
-    weight_kg: vitalSigns.weightKg,
-    height_cm: vitalSigns.heightCm,
+    blood_pressure_systolic: vitalSigns.bloodPressureSystolic ?? null,
+    blood_pressure_diastolic: vitalSigns.bloodPressureDiastolic ?? null,
+    pulse: vitalSigns.pulse ?? null,
+    temperature: vitalSigns.temperature ?? null,
+    spo2: vitalSigns.spo2 ?? null,
+    respiratory_rate: vitalSigns.respiratoryRate ?? null,
+    weight_kg: vitalSigns.weightKg ?? null,
+    height_cm: vitalSigns.heightCm ?? null,
   };
 };
 

@@ -4,14 +4,14 @@ export type ConsultationSortField = "created_at" | "visit_number" | "status" | "
 export type SortDirection = "asc" | "desc";
 
 export interface VitalSigns {
-  bloodPressureSystolic: number | null;
-  bloodPressureDiastolic: number | null;
-  pulse: number | null;
-  temperature: number | null;
-  spo2: number | null;
-  respiratoryRate: number | null;
-  weightKg: number | null;
-  heightCm: number | null;
+  bloodPressureSystolic?: number;
+  bloodPressureDiastolic?: number;
+  pulse?: number;
+  temperature?: number;
+  spo2?: number;
+  respiratoryRate?: number;
+  weightKg?: number;
+  heightCm?: number;
 }
 
 export interface Consultation {

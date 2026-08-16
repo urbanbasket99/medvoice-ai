@@ -27,27 +27,38 @@ const AuditTimeline = ({ logs }: AuditTimelineProps) => {
 
   return (
     <Stack spacing={2}>
-      {logs.map((log, index) => (
-        <Stack key={log.id} direction="row" spacing={2}>
-          <Box sx={{ width: 160, flexShrink: 0, pt: 1 }}>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {formatAuditTimestamp(log.timestamp)}
-            </Typography>
-          </Box>
+     {logs.map((log, index) => {
+  const actionColor = getActionChipColor(log.action);
 
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: 16 }}>
-            <Box
-              sx={(theme) => ({
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                bgcolor:
-                  getActionChipColor(log.action) === "default"
-                    ? theme.palette.grey[500]
-                    : theme.palette[getActionChipColor(log.action)].main,
-                mt: 1.25,
-              })}
-            />
+  return (
+    <Stack key={log.id} direction="row" spacing={2}>
+      <Box sx={{ width: 160, flexShrink: 0, pt: 1 }}>
+        <Typography variant="caption" color="text.secondary" display="block">
+          {formatAuditTimestamp(log.timestamp)}
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: 16,
+        }}
+      >
+  <Box
+    sx={(theme) => ({
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+    bgcolor:
+  actionColor === "default"
+    ? theme.palette.grey[500]
+    : theme.palette[
+        actionColor as "error" | "info" | "success" | "warning"
+      ].main,
+    })}
+  />
             {index < logs.length - 1 && (
               <Box sx={{ width: 2, flexGrow: 1, bgcolor: "divider", my: 0.5, minHeight: 24 }} />
             )}
@@ -81,7 +92,8 @@ const AuditTimeline = ({ logs }: AuditTimelineProps) => {
             </Stack>
           </Paper>
         </Stack>
-      ))}
+        );
+})}
     </Stack>
   );
 };

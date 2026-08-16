@@ -214,7 +214,7 @@ export const toStatusUpdatePayload = (
 
 export const toDispenseFormValues = (dispense: DispenseRecord): DispenseFormValues => ({
   prescriptionId: dispense.prescriptionId ?? "",
-  consultationId: dispense.consultationId,
+  consultationId: dispense.consultationId ?? "",
   notes: dispense.notes ?? "",
   items:
     dispense.items.length > 0

@@ -1,10 +1,19 @@
 import type { ConsultationFormValues } from "../schemas/consultationSchema";
 import type { Consultation, UpdateConsultationPayload, VitalSigns } from "../types/consultation.types";
 
-const parseOptionalNumber = (value: unknown): number | null => {
-  if (value === "" || value == null) return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+const parseOptionalNumber = (
+    value: unknown
+): number | undefined => {
+
+    if (value === "" || value == null) {
+        return undefined;
+    }
+
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed)
+        ? parsed
+        : undefined;
 };
 
 export const toFormValues = (consultation: Consultation): ConsultationFormValues => ({
@@ -14,16 +23,16 @@ export const toFormValues = (consultation: Consultation): ConsultationFormValues
   familyHistory: consultation.familyHistory ?? "",
   allergies: consultation.allergies ?? "",
   currentMedications: consultation.currentMedications ?? "",
-  vitalSigns: {
-    bloodPressureSystolic: consultation.vitalSigns?.bloodPressureSystolic ?? "",
-    bloodPressureDiastolic: consultation.vitalSigns?.bloodPressureDiastolic ?? "",
-    pulse: consultation.vitalSigns?.pulse ?? "",
-    temperature: consultation.vitalSigns?.temperature ?? "",
-    spo2: consultation.vitalSigns?.spo2 ?? "",
-    respiratoryRate: consultation.vitalSigns?.respiratoryRate ?? "",
-    weightKg: consultation.vitalSigns?.weightKg ?? "",
-    heightCm: consultation.vitalSigns?.heightCm ?? "",
-  },
+ vitalSigns: {
+  bloodPressureSystolic: consultation.vitalSigns?.bloodPressureSystolic ?? undefined,
+  bloodPressureDiastolic: consultation.vitalSigns?.bloodPressureDiastolic ?? undefined,
+  pulse: consultation.vitalSigns?.pulse ?? undefined,
+  temperature: consultation.vitalSigns?.temperature ?? undefined,
+  spo2: consultation.vitalSigns?.spo2 ?? undefined,
+  respiratoryRate: consultation.vitalSigns?.respiratoryRate ?? undefined,
+  weightKg: consultation.vitalSigns?.weightKg ?? undefined,
+  heightCm: consultation.vitalSigns?.heightCm ?? undefined,
+},
   physicalExamination: consultation.physicalExamination ?? "",
   diagnosis: consultation.diagnosis ?? "",
   assessment: consultation.assessment ?? "",

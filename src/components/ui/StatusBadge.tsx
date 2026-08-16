@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Box, Chip, type ChipProps } from "@mui/material";
+import type { ReactElement } from "react";
+import { Chip, type ChipProps } from "@mui/material";
 
 export type StatusVariant = "success" | "warning" | "error" | "info" | "neutral" | "default";
 
@@ -16,7 +16,7 @@ export interface StatusBadgeProps {
   label: string;
   variant?: StatusVariant;
   size?: ChipProps["size"];
-  icon?: ReactNode;
+  icon?: ReactElement;
 }
 
 const StatusBadge = ({ label, variant = "default", size = "small", icon }: StatusBadgeProps) => (

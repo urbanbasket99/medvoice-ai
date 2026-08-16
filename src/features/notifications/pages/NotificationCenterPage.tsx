@@ -64,7 +64,7 @@ const NotificationCenterPage = () => {
   });
 
   const notifications = data?.pages.flatMap((p) => p.items) ?? [];
-  const totalCount = data?.pages[0]?.total ?? 0;
+  
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const hasFilters = Boolean(typeFilter || readFilter !== "all" || search);
 

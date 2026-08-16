@@ -29,7 +29,7 @@ import {
   formatDateKey,
   startOfMonth,
   startOfWeek,
-  todayKey,
+
 } from "../utils/dateUtils";
 import type { Appointment, AppointmentSortField, CalendarViewMode } from "../types/appointment.types";
 

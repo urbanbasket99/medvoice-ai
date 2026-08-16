@@ -1,4 +1,4 @@
-import type { SearchCategory, SearchResult } from "../types/search.types";
+import type { SearchCategory } from "../types/search.types";
 
 export interface SearchResultApiResponse {
   id: string;

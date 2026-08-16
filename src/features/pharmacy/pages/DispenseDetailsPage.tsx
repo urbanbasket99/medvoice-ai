@@ -49,7 +49,7 @@ const DispenseDetailsPage = () => {
   const canDelete = Boolean(user?.isSuperuser || user?.permissions.includes("pharmacy:delete"));
 
   const { data: dispense, isLoading, isError, refetch } = useDispense(id);
-  const { data: consultation } = useConsultation(dispense?.consultationId);
+  const { data: consultation } = useConsultation(dispense?.consultationId ?? undefined)
   const updateStatus = useUpdateDispenseStatus();
   const deleteDispense = useDeleteDispense();
   const { snackbar, showSuccess, showError, closeSnackbar } = usePharmacySnackbar();

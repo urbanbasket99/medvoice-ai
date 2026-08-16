@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Skeleton, Stack } from "@mui/material";
+import { Box, Skeleton, Stack } from "@mui/material";
 
 const ConsultationDetailsSkeleton = () => (
   <Stack spacing={3}>

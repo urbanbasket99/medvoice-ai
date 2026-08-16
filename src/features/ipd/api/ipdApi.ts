@@ -42,7 +42,7 @@ import type {
   PagedResult,
   UpdateAdmissionPayload,
   UpdateBedPayload,
-  UpdateOtSchedulePayload,
+  
   UpdateWardPayload,
   UpsertMlcCasePayload,
   Ward,

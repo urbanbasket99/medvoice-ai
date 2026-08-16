@@ -1,7 +1,7 @@
 import { Box, Button, Stack } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
-
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import { EmptyState, ErrorBanner, PageHeader } from "../../../components/ui";
 
 import StockCard from "../components/StockCard";
@@ -29,7 +29,10 @@ const LowStockDashboardPage = () => {
       )}
 
       {lowStockQuery.isSuccess && items.length === 0 && (
-        <EmptyState title="All medicines are above minimum stock levels." />
+       <EmptyState
+  icon={Inventory2RoundedIcon}
+  title="All medicines are above minimum stock levels."
+/>
       )}
 
       <Box

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import { Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
 const ConsultationStickySaveBar = ({
