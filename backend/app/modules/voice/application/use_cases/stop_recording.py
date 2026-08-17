@@ -2,7 +2,7 @@ from dataclasses import replace
 from uuid import UUID
 
 from app.modules.voice.application.dto.voice_dto import StopRecordingInput
-from app.modules.voice.domain.entities.voice_recording import RecordingStatus
+from app.modules.voice.domain.entities.voice_recording import RecordingStatus, VoiceRecording
 from app.modules.voice.domain.exceptions import VoiceRecordingInvalidStateError, VoiceRecordingNotFoundError
 from app.modules.voice.domain.repositories.voice_recording_repository import VoiceRecordingRepository
 
