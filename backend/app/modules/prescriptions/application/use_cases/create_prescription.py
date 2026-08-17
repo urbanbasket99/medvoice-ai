@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import UTC, datetime
 from uuid import uuid4
 
