@@ -80,3 +80,5 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings accessor — safe to call repeatedly (e.g. as a FastAPI dependency)."""
     return Settings()
+
+settings = get_settings()
