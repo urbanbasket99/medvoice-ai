@@ -34,7 +34,10 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health", tags=["health"])
     async def health_check() -> dict[str, str]:
-        return {"status": "ok"}
+        return {
+    "status": "ok",
+    "multipart": __import__("multipart").__version__,
+}
 
     return app
 
