@@ -1,1 +1,14 @@
-{`n  "builds: [`n {`n src: api/index.py,`n use: @vercel/python`n }`n ],`n routes: [`n {`n src: /(.*),`n dest: api/index.py`n }`n ]`n}
+{
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ]
+}
