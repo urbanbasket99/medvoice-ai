@@ -64,12 +64,20 @@ def provide_upload_transcription_use_case(
     return UploadTranscriptionUseCase(repository, upload_service, storage_service, voice_lookup)
 
 
+
+
 def provide_start_transcription_use_case(
     repository: TranscriptionRepositoryDep,
     speech_to_text_service: SpeechToTextServiceDep,
     voice_lookup: VoiceRecordingLookupDep,
 ) -> StartTranscriptionUseCase:
     return StartTranscriptionUseCase(repository, speech_to_text_service, voice_lookup)
+
+StartTranscriptionUseCaseDep = Annotated[
+    StartTranscriptionUseCase,
+    Depends(provide_start_transcription_use_case),
+]
+
 
 
 def provide_get_transcription_use_case(repository: TranscriptionRepositoryDep) -> GetTranscriptionUseCase:
