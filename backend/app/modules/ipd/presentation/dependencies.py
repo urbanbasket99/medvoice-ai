@@ -159,6 +159,10 @@ def provide_create_admission_use_case(
 ) -> CreateAdmissionUseCase:
     return CreateAdmissionUseCase(admission_repository, bed_repository, number_generator)
 
+CreateAdmissionUseCaseDep = Annotated[
+    CreateAdmissionUseCase, Depends(provide_create_admission_use_case)
+]
+
 
 def provide_get_admission_use_case(
     admission_repository: AdmissionRepositoryDep,
@@ -286,9 +290,6 @@ GetBedUseCaseDep = Annotated[GetBedUseCase, Depends(provide_get_bed_use_case)]
 GetBedsUseCaseDep = Annotated[GetBedsUseCase, Depends(provide_get_beds_use_case)]
 ListAvailableBedsUseCaseDep = Annotated[
     ListAvailableBedsUseCase, Depends(provide_list_available_beds_use_case)
-]
-CreateAdmissionUseCaseDep = Annotated[
-    CreateAdmissionUseCase, Depends(provide_create_admission_use_case)
 ]
 GetAdmissionUseCaseDep = Annotated[GetAdmissionUseCase, Depends(provide_get_admission_use_case)]
 GetAdmissionsUseCaseDep = Annotated[GetAdmissionsUseCase, Depends(provide_get_admissions_use_case)]
